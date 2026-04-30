@@ -1,0 +1,488 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@400;500;600&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Sora',sans-serif;font-size:14px;color:var(--color-text-primary);background:transparent}
+  .header{display:flex;align-items:center;gap:14px;padding:1.25rem 0 1rem;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.25rem}
+  .avatar{width:48px;height:48px;border-radius:50%;background:#0F6E56;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px;color:#E1F5EE;flex-shrink:0}
+  .repo-name{font-size:18px;font-weight:600;color:var(--color-text-primary)}
+  .repo-sub{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+  .badge{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:500;margin-right:6px}
+  .b-green{background:#EAF3DE;color:#3B6D11}
+  .b-blue{background:#E6F1FB;color:#185FA5}
+  .b-teal{background:#E1F5EE;color:#0F6E56}
+  .b-amber{background:#FAEEDA;color:#854F0B}
+  .b-purple{background:#EEEDFE;color:#534AB7}
+  .b-coral{background:#FAECE7;color:#993C1D}
+  .tabs{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.25rem;overflow-x:auto}
+  .tab{padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--color-text-secondary);white-space:nowrap;transition:color .15s}
+  .tab.active{color:var(--color-text-primary);border-bottom-color:#0F6E56}
+  .tab:hover{color:var(--color-text-primary)}
+  .panel{display:none}.panel.active{display:block}
+  .file-list{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1rem}
+  .file-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer;transition:background .12s}
+  .file-row:last-child{border-bottom:none}
+  .file-row:hover{background:var(--color-background-secondary)}
+  .file-row.active{background:var(--color-background-secondary)}
+  .file-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+  .file-name{font-size:13px;font-weight:500;flex:1;color:var(--color-text-primary)}
+  .file-desc{font-size:11px;color:var(--color-text-secondary);text-align:right}
+  .code-box{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-top:0.75rem}
+  .code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary)}
+  .code-title{font-size:12px;font-weight:500;color:var(--color-text-secondary);font-family:'JetBrains Mono',monospace}
+  .copy-btn{font-size:11px;padding:3px 10px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;color:var(--color-text-secondary);font-family:'Sora',sans-serif}
+  .copy-btn:hover{background:var(--color-background-secondary)}
+  pre{padding:14px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;color:var(--color-text-primary)}
+  .kw{color:#185FA5}.str{color:#3B6D11}.cmt{color:var(--color-text-secondary);font-style:italic}
+  .fn{color:#534AB7}.ty{color:#993C1D}.num{color:#854F0B}
+  .section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-tertiary);margin:1rem 0 .5rem}
+  .skill-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1rem}
+  .skill-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px}
+  .skill-card-title{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+  .skill-card-tags{display:flex;flex-wrap:wrap;gap:4px}
+  .tag{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--color-background-secondary);color:var(--color-text-secondary)}
+  .readme-block{padding:1rem;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg)}
+  .readme-block h3{font-size:15px;font-weight:600;margin-bottom:.5rem;color:var(--color-text-primary)}
+  .readme-block p{font-size:13px;line-height:1.7;color:var(--color-text-secondary);margin-bottom:.75rem}
+  .readme-block ul{padding-left:1.2rem;font-size:13px;line-height:1.8;color:var(--color-text-secondary)}
+  .lang-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
+  .stats-row{display:flex;gap:16px;flex-wrap:wrap;margin:.75rem 0}
+  .stat{font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:5px}
+</style>
+
+<div class="header">
+  <div class="avatar">OS</div>
+  <div>
+    <div class="repo-name">ofer-sadeh-man / enterprise-implementations</div>
+    <div class="repo-sub">Technical portfolio: identity, APIs, integrations & automation</div>
+    <div style="margin-top:6px">
+      <span class="badge b-teal">Public</span>
+      <span class="badge b-blue">⭐ Portfolio</span>
+      <span class="badge b-purple">C# · REST · SAML · SQL</span>
+    </div>
+  </div>
+</div>
+
+<div class="stats-row">
+  <span class="stat"><span class="lang-dot" style="background:#178600"></span>C#</span>
+  <span class="stat"><span class="lang-dot" style="background:#e44b23"></span>HTML5</span>
+  <span class="stat"><span class="lang-dot" style="background:#f7df1e"></span>JavaScript</span>
+  <span class="stat"><span class="lang-dot" style="background:#336791"></span>SQL</span>
+  <span class="stat"><span class="lang-dot" style="background:#c76b29"></span>XML/XSLT</span>
+  <span class="stat">6 projects · 15+ years XP</span>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('readme')">README</div>
+  <div class="tab" onclick="switchTab('jwt')">JWT / Auth</div>
+  <div class="tab" onclick="switchTab('saml')">SAML / SSO</div>
+  <div class="tab" onclick="switchTab('api')">REST API</div>
+  <div class="tab" onclick="switchTab('sql')">SQL</div>
+  <div class="tab" onclick="switchTab('xslt')">XML/XSLT</div>
+</div>
+
+<div id="readme" class="panel active">
+  <div class="readme-block">
+    <h3>Enterprise Implementation Portfolio</h3>
+    <p>15+ years of customer-facing technical implementations at DocuSign, Tipalti, and ClickSoftware (Salesforce). This repo contains working code samples covering the core technologies I use daily: identity & security, REST/SOAP API integrations, database design, and XML transformation.</p>
+    <ul>
+      <li><strong>JWT / Auth</strong> — Token generation, validation, and middleware in C#</li>
+      <li><strong>SAML / SSO</strong> — SAML 2.0 assertion parsing and Okta/Ping integration helpers</li>
+      <li><strong>REST API</strong> — DocuSign & Tipalti API wrappers with retry logic</li>
+      <li><strong>SQL</strong> — Reporting queries, auditing, and onboarding data pipelines</li>
+      <li><strong>XML / XSLT</strong> — Document transformation for e-signature workflows</li>
+    </ul>
+  </div>
+  <div class="section-label" style="margin-top:1.25rem">Skills snapshot</div>
+  <div class="skill-grid">
+    <div class="skill-card"><div class="skill-card-title">Identity & Security</div><div class="skill-card-tags"><span class="tag">SAML</span><span class="tag">JWT</span><span class="tag">Okta</span><span class="tag">Ping</span><span class="tag">SSL</span><span class="tag">Kerberos</span></div></div>
+    <div class="skill-card"><div class="skill-card-title">Languages</div><div class="skill-card-tags"><span class="tag">C#/.NET</span><span class="tag">VBA</span><span class="tag">APEX</span><span class="tag">HTML5</span></div></div>
+    <div class="skill-card"><div class="skill-card-title">APIs</div><div class="skill-card-tags"><span class="tag">REST</span><span class="tag">SOAP</span><span class="tag">Salesforce</span><span class="tag">SAP</span><span class="tag">Workday</span></div></div>
+    <div class="skill-card"><div class="skill-card-title">Databases</div><div class="skill-card-tags"><span class="tag">SQL Server</span><span class="tag">Oracle</span><span class="tag">XML</span></div></div>
+    <div class="skill-card"><div class="skill-card-title">Platforms</div><div class="skill-card-tags"><span class="tag">Azure AD</span><span class="tag">Tomcat</span><span class="tag">ESRI/GIS</span><span class="tag">Linux</span></div></div>
+    <div class="skill-card"><div class="skill-card-title">Integrations</div><div class="skill-card-tags"><span class="tag">DocuSign</span><span class="tag">Tipalti</span><span class="tag">ServiceNow</span></div></div>
+  </div>
+</div>
+
+<div id="jwt" class="panel">
+  <div class="section-label">JWT token service — C# / .NET</div>
+  <div class="file-list">
+    <div class="file-row active"><span class="file-icon">📄</span><span class="file-name">JwtTokenService.cs</span><span class="file-desc">Token generation + validation</span></div>
+    <div class="file-row"><span class="file-icon">📄</span><span class="file-name">JwtMiddleware.cs</span><span class="file-desc">ASP.NET request pipeline</span></div>
+  </div>
+  <div class="code-box">
+    <div class="code-header"><span class="code-title">JwtTokenService.cs</span><button class="copy-btn" onclick="copyCode('jwt-code')">Copy</button></div>
+    <pre id="jwt-code"><span class="kw">using</span> System;
+<span class="kw">using</span> System.IdentityModel.Tokens.Jwt;
+<span class="kw">using</span> System.Security.Claims;
+<span class="kw">using</span> Microsoft.IdentityModel.Tokens;
+
+<span class="kw">namespace</span> <span class="ty">EnterpriseAuth</span>.Services
+{
+    <span class="kw">public class</span> <span class="ty">JwtTokenService</span>
+    {
+        <span class="kw">private readonly string</span> _secret;
+        <span class="kw">private readonly int</span> _expiryMinutes;
+
+        <span class="kw">public</span> <span class="fn">JwtTokenService</span>(<span class="kw">string</span> secret, <span class="kw">int</span> expiryMinutes = 60)
+        {
+            _secret = secret;
+            _expiryMinutes = expiryMinutes;
+        }
+
+        <span class="cmt">// Generate a signed JWT for an authenticated enterprise user</span>
+        <span class="kw">public string</span> <span class="fn">GenerateToken</span>(<span class="kw">string</span> userId, <span class="kw">string</span> role, <span class="kw">string</span> tenantId)
+        {
+            <span class="kw">var</span> key = <span class="kw">new</span> <span class="ty">SymmetricSecurityKey</span>(
+                System.Text.Encoding.UTF8.<span class="fn">GetBytes</span>(_secret));
+            <span class="kw">var</span> creds = <span class="kw">new</span> <span class="ty">SigningCredentials</span>(
+                key, SecurityAlgorithms.HmacSha256);
+
+            <span class="kw">var</span> claims = <span class="kw">new</span>[]
+            {
+                <span class="kw">new</span> <span class="ty">Claim</span>(JwtRegisteredClaimNames.Sub, userId),
+                <span class="kw">new</span> <span class="ty">Claim</span>(<span class="str">"role"</span>, role),
+                <span class="kw">new</span> <span class="ty">Claim</span>(<span class="str">"tenantId"</span>, tenantId),
+                <span class="kw">new</span> <span class="ty">Claim</span>(JwtRegisteredClaimNames.Jti,
+                    Guid.NewGuid().<span class="fn">ToString</span>())
+            };
+
+            <span class="kw">var</span> token = <span class="kw">new</span> <span class="ty">JwtSecurityToken</span>(
+                issuer: <span class="str">"enterprise-sso"</span>,
+                audience: <span class="str">"enterprise-apps"</span>,
+                claims: claims,
+                expires: DateTime.UtcNow.<span class="fn">AddMinutes</span>(_expiryMinutes),
+                signingCredentials: creds);
+
+            <span class="kw">return new</span> <span class="ty">JwtSecurityTokenHandler</span>().<span class="fn">WriteToken</span>(token);
+        }
+
+        <span class="cmt">// Validate token and extract principal</span>
+        <span class="kw">public</span> <span class="ty">ClaimsPrincipal</span> <span class="fn">ValidateToken</span>(<span class="kw">string</span> token)
+        {
+            <span class="kw">var</span> handler = <span class="kw">new</span> <span class="ty">JwtSecurityTokenHandler</span>();
+            <span class="kw">var</span> key = System.Text.Encoding.UTF8.<span class="fn">GetBytes</span>(_secret);
+
+            <span class="kw">return</span> handler.<span class="fn">ValidateToken</span>(token, <span class="kw">new</span> <span class="ty">TokenValidationParameters</span>
+            {
+                ValidateIssuerSigningKey = <span class="kw">true</span>,
+                IssuerSigningKey = <span class="kw">new</span> <span class="ty">SymmetricSecurityKey</span>(key),
+                ValidIssuer = <span class="str">"enterprise-sso"</span>,
+                ValidAudience = <span class="str">"enterprise-apps"</span>,
+                ClockSkew = TimeSpan.<span class="fn">FromSeconds</span>(<span class="num">30</span>)
+            }, <span class="kw">out</span> _);
+        }
+    }
+}</pre>
+  </div>
+</div>
+
+<div id="saml" class="panel">
+  <div class="section-label">SAML 2.0 SSO integration — C# / Okta / Ping Identity</div>
+  <div class="file-list">
+    <div class="file-row active"><span class="file-icon">📄</span><span class="file-name">SamlAssertionParser.cs</span><span class="file-desc">Parse & validate assertions</span></div>
+  </div>
+  <div class="code-box">
+    <div class="code-header"><span class="code-title">SamlAssertionParser.cs</span><button class="copy-btn" onclick="copyCode('saml-code')">Copy</button></div>
+    <pre id="saml-code"><span class="kw">using</span> System;
+<span class="kw">using</span> System.Xml;
+<span class="kw">using</span> System.Security.Cryptography.X509Certificates;
+<span class="kw">using</span> System.Security.Cryptography.Xml;
+
+<span class="kw">namespace</span> <span class="ty">EnterpriseAuth</span>.Saml
+{
+    <span class="cmt">/// Validates a SAML 2.0 Response from Okta / Ping Identity IdPs.
+    /// Used in DocuSign and Tipalti SSO onboarding flows.</span>
+    <span class="kw">public class</span> <span class="ty">SamlAssertionParser</span>
+    {
+        <span class="kw">private readonly</span> <span class="ty">X509Certificate2</span> _idpCertificate;
+
+        <span class="kw">public</span> <span class="fn">SamlAssertionParser</span>(<span class="kw">string</span> certBase64)
+        {
+            <span class="kw">var</span> certBytes = Convert.<span class="fn">FromBase64String</span>(certBase64);
+            _idpCertificate = <span class="kw">new</span> <span class="ty">X509Certificate2</span>(certBytes);
+        }
+
+        <span class="kw">public</span> <span class="ty">SamlUser</span> <span class="fn">Parse</span>(<span class="kw">string</span> samlResponseBase64)
+        {
+            <span class="kw">var</span> xml = <span class="kw">new</span> <span class="ty">XmlDocument</span> { PreserveWhitespace = <span class="kw">true</span> };
+            xml.<span class="fn">LoadXml</span>(System.Text.Encoding.UTF8.<span class="fn">GetString</span>(
+                Convert.<span class="fn">FromBase64String</span>(samlResponseBase64)));
+
+            <span class="fn">ValidateSignature</span>(xml);
+
+            <span class="kw">var</span> ns = <span class="kw">new</span> <span class="ty">XmlNamespaceManager</span>(xml.NameTable);
+            ns.<span class="fn">AddNamespace</span>(<span class="str">"saml"</span>,
+                <span class="str">"urn:oasis:names:tc:SAML:2.0:assertion"</span>);
+
+            <span class="kw">return new</span> <span class="ty">SamlUser</span>
+            {
+                NameId = xml.<span class="fn">SelectSingleNode</span>(
+                    <span class="str">"//saml:NameID"</span>, ns)?.InnerText,
+                Email = <span class="fn">GetAttribute</span>(xml, ns, <span class="str">"email"</span>),
+                Role  = <span class="fn">GetAttribute</span>(xml, ns, <span class="str">"role"</span>),
+                TenantId = <span class="fn">GetAttribute</span>(xml, ns, <span class="str">"tenantId"</span>)
+            };
+        }
+
+        <span class="kw">private void</span> <span class="fn">ValidateSignature</span>(<span class="ty">XmlDocument</span> doc)
+        {
+            <span class="kw">var</span> signed = <span class="kw">new</span> <span class="ty">SignedXml</span>(doc);
+            <span class="kw">var</span> sigNode = doc.<span class="fn">GetElementsByTagName</span>(<span class="str">"Signature"</span>)[<span class="num">0</span>]
+                <span class="kw">as</span> <span class="ty">XmlElement</span>;
+            signed.<span class="fn">LoadXml</span>(sigNode);
+
+            <span class="kw">if</span> (!signed.<span class="fn">CheckSignature</span>(_idpCertificate, <span class="kw">true</span>))
+                <span class="kw">throw new</span> <span class="ty">SecurityException</span>(<span class="str">"Invalid SAML signature"</span>);
+        }
+
+        <span class="kw">private string</span> <span class="fn">GetAttribute</span>(<span class="ty">XmlDocument</span> doc,
+            <span class="ty">XmlNamespaceManager</span> ns, <span class="kw">string</span> name)
+            => doc.<span class="fn">SelectSingleNode</span>(
+                $<span class="str">"//saml:Attribute[@Name='{name}']/saml:AttributeValue"</span>,
+                ns)?.InnerText;
+    }
+
+    <span class="kw">public class</span> <span class="ty">SamlUser</span>
+    {
+        <span class="kw">public string</span> NameId { <span class="kw">get</span>; <span class="kw">set</span>; }
+        <span class="kw">public string</span> Email  { <span class="kw">get</span>; <span class="kw">set</span>; }
+        <span class="kw">public string</span> Role   { <span class="kw">get</span>; <span class="kw">set</span>; }
+        <span class="kw">public string</span> TenantId { <span class="kw">get</span>; <span class="kw">set</span>; }
+    }
+}</pre>
+  </div>
+</div>
+
+<div id="api" class="panel">
+  <div class="section-label">REST API client — DocuSign eSignature (C#)</div>
+  <div class="file-list">
+    <div class="file-row active"><span class="file-icon">📄</span><span class="file-name">DocuSignClient.cs</span><span class="file-desc">Send envelope, retry logic</span></div>
+  </div>
+  <div class="code-box">
+    <div class="code-header"><span class="code-title">DocuSignClient.cs</span><button class="copy-btn" onclick="copyCode('api-code')">Copy</button></div>
+    <pre id="api-code"><span class="kw">using</span> System;
+<span class="kw">using</span> System.Net.Http;
+<span class="kw">using</span> System.Text;
+<span class="kw">using</span> System.Text.Json;
+<span class="kw">using</span> System.Threading.Tasks;
+
+<span class="kw">namespace</span> <span class="ty">EnterpriseIntegrations</span>.DocuSign
+{
+    <span class="cmt">/// Lightweight DocuSign REST v2.1 client.
+    /// Handles JWT auth + exponential-backoff retries.</span>
+    <span class="kw">public class</span> <span class="ty">DocuSignClient</span>
+    {
+        <span class="kw">private readonly</span> <span class="ty">HttpClient</span> _http;
+        <span class="kw">private readonly string</span> _baseUrl;
+        <span class="kw">private</span> <span class="ty">JwtTokenService</span> _tokenSvc;
+
+        <span class="kw">public</span> <span class="fn">DocuSignClient</span>(<span class="kw">string</span> accountId, <span class="kw">string</span> jwtSecret)
+        {
+            _http = <span class="kw">new</span> <span class="ty">HttpClient</span>();
+            _baseUrl = $<span class="str">"https://na4.docusign.net/restapi/v2.1/accounts/{accountId}"</span>;
+            _tokenSvc = <span class="kw">new</span> <span class="ty">JwtTokenService</span>(jwtSecret);
+        }
+
+        <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="kw">string</span>&gt; <span class="fn">SendEnvelopeAsync</span>(
+            <span class="kw">string</span> recipientEmail,
+            <span class="kw">string</span> recipientName,
+            <span class="kw">byte</span>[] documentBytes,
+            <span class="kw">string</span> docName)
+        {
+            <span class="kw">var</span> token = _tokenSvc.<span class="fn">GenerateToken</span>(
+                <span class="str">"integration-user"</span>, <span class="str">"sender"</span>, <span class="str">"default"</span>);
+            _http.DefaultRequestHeaders.Authorization =
+                <span class="kw">new</span> System.Net.Http.Headers
+                    .<span class="ty">AuthenticationHeaderValue</span>(<span class="str">"Bearer"</span>, token);
+
+            <span class="kw">var</span> payload = <span class="kw">new</span>
+            {
+                emailSubject = <span class="str">"Please sign this document"</span>,
+                status = <span class="str">"sent"</span>,
+                documents = <span class="kw">new</span>[] { <span class="kw">new</span> {
+                    documentBase64 = Convert.<span class="fn">ToBase64String</span>(documentBytes),
+                    name = docName, documentId = <span class="str">"1"</span>
+                }},
+                recipients = <span class="kw">new</span> {
+                    signers = <span class="kw">new</span>[] { <span class="kw">new</span> {
+                        email = recipientEmail,
+                        name = recipientName,
+                        recipientId = <span class="str">"1"</span>,
+                        tabs = <span class="kw">new</span> {
+                            signHereTabs = <span class="kw">new</span>[] { <span class="kw">new</span> {
+                                anchorString = <span class="str">"/sig1/"</span>,
+                                anchorUnits = <span class="str">"pixels"</span>
+                            }}
+                        }
+                    }}
+                }
+            };
+
+            <span class="kw">return await</span> <span class="fn">PostWithRetryAsync</span>(
+                $<span class="str">"{_baseUrl}/envelopes"</span>,
+                JsonSerializer.<span class="fn">Serialize</span>(payload));
+        }
+
+        <span class="kw">private async</span> <span class="ty">Task</span>&lt;<span class="kw">string</span>&gt; <span class="fn">PostWithRetryAsync</span>(
+            <span class="kw">string</span> url, <span class="kw">string</span> json, <span class="kw">int</span> maxRetries = <span class="num">3</span>)
+        {
+            <span class="kw">for</span> (<span class="kw">int</span> attempt = <span class="num">0</span>; attempt &lt; maxRetries; attempt++)
+            {
+                <span class="kw">var</span> content = <span class="kw">new</span> <span class="ty">StringContent</span>(
+                    json, Encoding.UTF8, <span class="str">"application/json"</span>);
+                <span class="kw">var</span> resp = <span class="kw">await</span> _http.<span class="fn">PostAsync</span>(url, content);
+
+                <span class="kw">if</span> (resp.IsSuccessStatusCode)
+                    <span class="kw">return await</span> resp.Content.<span class="fn">ReadAsStringAsync</span>();
+
+                <span class="kw">if</span> (attempt == maxRetries - <span class="num">1</span>) resp.<span class="fn">EnsureSuccessStatusCode</span>();
+                <span class="kw">await</span> Task.<span class="fn">Delay</span>(<span class="num">500</span> * (<span class="kw">int</span>)Math.<span class="fn">Pow</span>(<span class="num">2</span>, attempt));
+            }
+            <span class="kw">return null</span>;
+        }
+    }
+}</pre>
+  </div>
+</div>
+
+<div id="sql" class="panel">
+  <div class="section-label">SQL — onboarding audit & reporting queries</div>
+  <div class="file-list">
+    <div class="file-row active"><span class="file-icon">📄</span><span class="file-name">onboarding_audit.sql</span><span class="file-desc">Customer progress report</span></div>
+  </div>
+  <div class="code-box">
+    <div class="code-header"><span class="code-title">onboarding_audit.sql — SQL Server</span><button class="copy-btn" onclick="copyCode('sql-code')">Copy</button></div>
+    <pre id="sql-code"><span class="cmt">-- Onboarding progress report per enterprise customer
+-- Tracks milestones: kickoff → UAT → go-live
+-- Used in Tipalti and DocuSign implementation dashboards</span>
+
+<span class="kw">WITH</span> MilestoneProgress <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        c.CustomerID,
+        c.CompanyName,
+        c.ContractValue,
+        c.AssignedManager,
+        m.MilestoneName,
+        m.PlannedDate,
+        m.CompletedDate,
+        <span class="kw">CASE</span>
+            <span class="kw">WHEN</span> m.CompletedDate <span class="kw">IS NOT NULL</span>
+                <span class="kw">THEN</span> <span class="str">'Completed'</span>
+            <span class="kw">WHEN</span> m.PlannedDate &lt; <span class="fn">GETDATE</span>()
+                <span class="kw">THEN</span> <span class="str">'Overdue'</span>
+            <span class="kw">ELSE</span> <span class="str">'Pending'</span>
+        <span class="kw">END</span> <span class="kw">AS</span> Status,
+        <span class="fn">DATEDIFF</span>(<span class="kw">day</span>,
+            m.PlannedDate,
+            <span class="fn">ISNULL</span>(m.CompletedDate, <span class="fn">GETDATE</span>())) <span class="kw">AS</span> SlippageDays
+    <span class="kw">FROM</span> Customers c
+    <span class="kw">INNER JOIN</span> OnboardingMilestones m
+        <span class="kw">ON</span> c.CustomerID = m.CustomerID
+    <span class="kw">WHERE</span> c.Status = <span class="str">'Active'</span>
+),
+Summary <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        CustomerID,
+        CompanyName,
+        ContractValue,
+        AssignedManager,
+        <span class="fn">COUNT</span>(*) <span class="kw">AS</span> TotalMilestones,
+        <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> Status = <span class="str">'Completed'</span>
+            <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) <span class="kw">AS</span> CompletedCount,
+        <span class="fn">MAX</span>(<span class="kw">CASE WHEN</span> Status = <span class="str">'Overdue'</span>
+            <span class="kw">THEN</span> SlippageDays <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) <span class="kw">AS</span> MaxSlippage
+    <span class="kw">FROM</span> MilestoneProgress
+    <span class="kw">GROUP BY</span>
+        CustomerID, CompanyName,
+        ContractValue, AssignedManager
+)
+<span class="kw">SELECT</span>
+    CompanyName,
+    AssignedManager,
+    <span class="fn">FORMAT</span>(ContractValue, <span class="str">'C0'</span>) <span class="kw">AS</span> ContractValue,
+    <span class="fn">CONCAT</span>(CompletedCount, <span class="str">' / '</span>, TotalMilestones)
+        <span class="kw">AS</span> MilestoneProgress,
+    <span class="fn">CAST</span>(CompletedCount * <span class="num">100.0</span>
+        / TotalMilestones <span class="kw">AS</span> <span class="ty">INT</span>) <span class="kw">AS</span> PctComplete,
+    MaxSlippage <span class="kw">AS</span> MaxSlippageDays
+<span class="kw">FROM</span> Summary
+<span class="kw">ORDER BY</span> ContractValue <span class="kw">DESC</span>, PctComplete <span class="kw">ASC</span>;</pre>
+  </div>
+</div>
+
+<div id="xslt" class="panel">
+  <div class="section-label">XML / XSLT — document transformation for e-signature</div>
+  <div class="file-list">
+    <div class="file-row active"><span class="file-icon">📄</span><span class="file-name">contract_transform.xslt</span><span class="file-desc">XML → HTML signing doc</span></div>
+  </div>
+  <div class="code-box">
+    <div class="code-header"><span class="code-title">contract_transform.xslt</span><button class="copy-btn" onclick="copyCode('xslt-code')">Copy</button></div>
+    <pre id="xslt-code"><span class="cmt">&lt;!-- Transforms enterprise contract XML into a
+     signature-ready HTML document for DocuSign workflows --&gt;</span>
+<span class="kw">&lt;xsl:stylesheet</span>
+    <span class="fn">version</span>=<span class="str">"1.0"</span>
+    <span class="fn">xmlns:xsl</span>=<span class="str">"http://www.w3.org/1999/XSL/Transform"</span>
+    <span class="fn">xmlns:ct</span>=<span class="str">"urn:enterprise:contract:v1"</span><span class="kw">&gt;</span>
+
+  <span class="kw">&lt;xsl:output</span> <span class="fn">method</span>=<span class="str">"html"</span> <span class="fn">indent</span>=<span class="str">"yes"</span>
+      <span class="fn">encoding</span>=<span class="str">"UTF-8"</span><span class="kw">/&gt;</span>
+
+  <span class="kw">&lt;xsl:template</span> <span class="fn">match</span>=<span class="str">"/ct:Contract"</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;html&gt;&lt;body</span> <span class="fn">style</span>=<span class="str">"font-family:Arial;max-width:720px"</span><span class="kw">&gt;</span>
+
+      <span class="kw">&lt;h1&gt;</span>
+        <span class="kw">&lt;xsl:value-of</span> <span class="fn">select</span>=<span class="str">"ct:Header/ct:Title"</span><span class="kw">/&gt;</span>
+      <span class="kw">&lt;/h1&gt;</span>
+
+      <span class="kw">&lt;table</span> <span class="fn">border</span>=<span class="str">"1"</span> <span class="fn">cellpadding</span>=<span class="str">"6"</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;tr&gt;</span>
+          <span class="kw">&lt;th&gt;</span>Party<span class="kw">&lt;/th&gt;&lt;th&gt;</span>Role<span class="kw">&lt;/th&gt;&lt;th&gt;</span>Email<span class="kw">&lt;/th&gt;</span>
+        <span class="kw">&lt;/tr&gt;</span>
+        <span class="kw">&lt;xsl:for-each</span> <span class="fn">select</span>=<span class="str">"ct:Parties/ct:Party"</span><span class="kw">&gt;</span>
+          <span class="kw">&lt;tr&gt;</span>
+            <span class="kw">&lt;td&gt;&lt;xsl:value-of</span> <span class="fn">select</span>=<span class="str">"ct:Name"</span><span class="kw">/&gt;&lt;/td&gt;</span>
+            <span class="kw">&lt;td&gt;&lt;xsl:value-of</span> <span class="fn">select</span>=<span class="str">"ct:Role"</span><span class="kw">/&gt;&lt;/td&gt;</span>
+            <span class="kw">&lt;td&gt;&lt;xsl:value-of</span> <span class="fn">select</span>=<span class="str">"ct:Email"</span><span class="kw">/&gt;&lt;/td&gt;</span>
+          <span class="kw">&lt;/tr&gt;</span>
+        <span class="kw">&lt;/xsl:for-each&gt;</span>
+      <span class="kw">&lt;/table&gt;</span>
+
+      <span class="kw">&lt;xsl:for-each</span> <span class="fn">select</span>=<span class="str">"ct:Clauses/ct:Clause"</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;h3&gt;</span>
+          <span class="kw">&lt;xsl:value-of</span> <span class="fn">select</span>=<span class="str">"@number"</span><span class="kw">/&gt;</span>.
+          <span class="kw">&lt;xsl:value-of</span> <span class="fn">select</span>=<span class="str">"ct:Title"</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;/h3&gt;</span>
+        <span class="kw">&lt;p&gt;&lt;xsl:value-of</span> <span class="fn">select</span>=<span class="str">"ct:Body"</span><span class="kw">/&gt;&lt;/p&gt;</span>
+      <span class="kw">&lt;/xsl:for-each&gt;</span>
+
+      <span class="cmt">&lt;!-- Anchor tag picked up by DocuSign tab detection --&gt;</span>
+      <span class="kw">&lt;p&gt;</span>Signature: <span class="kw">&lt;span</span>
+          <span class="fn">style</span>=<span class="str">"color:white"</span><span class="kw">&gt;</span>/sig1/<span class="kw">&lt;/span&gt;&lt;/p&gt;</span>
+
+    <span class="kw">&lt;/body&gt;&lt;/html&gt;</span>
+  <span class="kw">&lt;/xsl:template&gt;</span>
+
+<span class="kw">&lt;/xsl:stylesheet&gt;</span></pre>
+  </div>
+</div>
+
+<script>
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    const ids=['readme','jwt','saml','api','sql','xslt'];
+    t.classList.toggle('active', ids[i]===id);
+  });
+  document.querySelectorAll('.panel').forEach(p=>{
+    p.classList.toggle('active', p.id===id);
+  });
+}
+function copyCode(id){
+  const el=document.getElementById(id);
+  const text=el.innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btns=document.querySelectorAll('.copy-btn');
+    btns.forEach(b=>{if(b.getAttribute('onclick').includes(id)){b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',1500);}});
+  });
+}
+</script>
