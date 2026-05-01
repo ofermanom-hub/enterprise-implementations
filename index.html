@@ -1,119 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ofer Sadeh Man – Implementation Manager with 15+ years of enterprise software experience. Live coding demos included.">
+  <title>Ofer Sadeh Man | Implementation Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Sora',sans-serif;font-size:15px;line-height:1.6;color:#1a1f2e;background:#f8fafb}
+    :root{
+      --teal:#0F6E56;--teal-d:#0a5442;--teal-l:#E1F5EE;
+      --blue:#185FA5;--blue-l:#E6F1FB;
+      --navy:#0d1b2a;--navy-m:#1a2d42;--navy-l:#243548;
+      --bg:#f8fafb;--white:#ffffff;--border:#e2e8f0;
+      --text:#1a1f2e;--muted:#64748b;
+      --amber:#854F0B;--amber-l:#FAEEDA;
+      --purple:#534AB7;--purple-l:#EEEDFE;
+      --green:#3B6D11;--green-l:#EAF3DE;
+      --coral:#993C1D;--coral-l:#FAECE7;
+      --r:14px;--r-sm:8px;
+      --shadow:0 2px 12px rgba(0,0,0,.07);
+      --shadow-lg:0 8px 32px rgba(0,0,0,.12);
+      --mono:'JetBrains Mono',monospace
+    }
+    a{color:var(--teal);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .container{max-width:1100px;margin:0 auto;padding:0 24px}
+    section{padding:80px 0}
+    .sec-label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+    h2{font-size:32px;font-weight:700;color:var(--text);margin-bottom:16px}
 
+    /* NAV */
+    nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);transition:box-shadow .2s}
+    nav.scrolled{box-shadow:var(--shadow)}
+    .nav-inner{display:flex;align-items:center;gap:20px;height:60px;max-width:1100px;margin:0 auto;padding:0 24px}
+    .nav-logo{font-size:17px;font-weight:700;color:var(--teal);font-family:var(--mono);margin-right:auto}
+    .nav-links{display:flex;gap:2px}
+    .nav-links a{font-size:13px;font-weight:500;color:var(--muted);padding:6px 11px;border-radius:6px;transition:color .15s,background .15s}
+    .nav-links a:hover,.nav-links a.active{color:var(--teal);background:var(--teal-l);text-decoration:none}
+    .nav-links a.hl{color:var(--teal);background:var(--teal-l)}
+    .nav-cta{font-size:13px;font-weight:600;background:var(--teal);color:#fff!important;padding:7px 18px;border-radius:20px;transition:background .15s,transform .1s;flex-shrink:0}
+    .nav-cta:hover{background:var(--teal-d);text-decoration:none;transform:translateY(-1px)}
 
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@400;500;600&display=swap');
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Sora',sans-serif;font-size:14px;color:var(--color-text-primary);background:transparent}
-  .header{display:flex;align-items:center;gap:14px;padding:1.25rem 0 1rem;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.25rem}
-  .avatar{width:48px;height:48px;border-radius:50%;background:#0F6E56;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px;color:#E1F5EE;flex-shrink:0}
-  .repo-name{font-size:18px;font-weight:600;color:var(--color-text-primary)}
-  .repo-sub{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
-  .badge{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:500;margin-right:6px}
-  .b-green{background:#EAF3DE;color:#3B6D11}
-  .b-blue{background:#E6F1FB;color:#185FA5}
-  .b-teal{background:#E1F5EE;color:#0F6E56}
-  .b-amber{background:#FAEEDA;color:#854F0B}
-  .b-purple{background:#EEEDFE;color:#534AB7}
-  .b-coral{background:#FAECE7;color:#993C1D}
-  .tabs{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.25rem;overflow-x:auto}
-  .tab{padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--color-text-secondary);white-space:nowrap;transition:color .15s}
-  .tab.active{color:var(--color-text-primary);border-bottom-color:#0F6E56}
-  .tab:hover{color:var(--color-text-primary)}
-  .panel{display:none}.panel.active{display:block}
-  .file-list{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1rem}
-  .file-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer;transition:background .12s}
-  .file-row:last-child{border-bottom:none}
-  .file-row:hover{background:var(--color-background-secondary)}
-  .file-row.active{background:var(--color-background-secondary)}
-  .file-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
-  .file-name{font-size:13px;font-weight:500;flex:1;color:var(--color-text-primary)}
-  .file-desc{font-size:11px;color:var(--color-text-secondary);text-align:right}
-  .code-box{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-top:0.75rem}
-  .code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary)}
-  .code-title{font-size:12px;font-weight:500;color:var(--color-text-secondary);font-family:'JetBrains Mono',monospace}
-  .copy-btn{font-size:11px;padding:3px 10px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;color:var(--color-text-secondary);font-family:'Sora',sans-serif}
-  .copy-btn:hover{background:var(--color-background-secondary)}
-  pre{padding:14px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;color:var(--color-text-primary)}
-  .kw{color:#185FA5}.str{color:#3B6D11}.cmt{color:var(--color-text-secondary);font-style:italic}
-  .fn{color:#534AB7}.ty{color:#993C1D}.num{color:#854F0B}
-  .section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-tertiary);margin:1rem 0 .5rem}
-  .skill-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1rem}
-  .skill-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px}
-  .skill-card-title{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
-  .skill-card-tags{display:flex;flex-wrap:wrap;gap:4px}
-  .tag{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--color-background-secondary);color:var(--color-text-secondary)}
-  .readme-block{padding:1rem;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg)}
-  .readme-block h3{font-size:15px;font-weight:600;margin-bottom:.5rem;color:var(--color-text-primary)}
-  .readme-block p{font-size:13px;line-height:1.7;color:var(--color-text-secondary);margin-bottom:.75rem}
-  .readme-block ul{padding-left:1.2rem;font-size:13px;line-height:1.8;color:var(--color-text-secondary)}
-  .lang-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
-  .stats-row{display:flex;gap:16px;flex-wrap:wrap;margin:.75rem 0}
-  .stat{font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:5px}
-</style>
+    /* HERO */
+    #hero{background:linear-gradient(135deg,var(--navy) 0%,#0d3d2e 100%);padding:100px 0;color:#fff;position:relative;overflow:hidden}
+    #hero::before{content:'';position:absolute;top:-40%;right:-8%;width:500px;height:500px;background:radial-gradient(circle,rgba(15,110,86,.3) 0%,transparent 70%);border-radius:50%}
+    .hero-grid{display:grid;grid-template-columns:1fr 320px;gap:60px;align-items:center;position:relative}
+    .hero-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;background:rgba(15,110,86,.3);color:#6ee7c5;border:1px solid rgba(15,110,86,.6);padding:4px 12px;border-radius:20px;margin-bottom:20px}
+    .hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:#6ee7c5;animation:blink 2s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    .hero-name{font-size:54px;font-weight:700;line-height:1.1;margin-bottom:10px;letter-spacing:-1px}
+    .hero-name em{color:#6ee7c5;font-style:normal}
+    .hero-sub{font-size:19px;font-weight:300;color:rgba(255,255,255,.7);margin-bottom:24px;letter-spacing:1px}
+    .hero-tagline{font-size:15px;color:rgba(255,255,255,.6);line-height:1.75;margin-bottom:36px;max-width:480px}
+    .hero-btns{display:flex;gap:12px;flex-wrap:wrap}
+    .btn-p{background:var(--teal);color:#fff;padding:12px 28px;border-radius:8px;font-weight:600;font-size:14px;transition:transform .15s,box-shadow .15s;display:inline-block}
+    .btn-p:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(15,110,86,.4);text-decoration:none;color:#fff}
+    .btn-o{background:transparent;color:#fff;padding:12px 28px;border-radius:8px;font-weight:500;font-size:14px;border:1.5px solid rgba(255,255,255,.3);transition:border-color .15s,background .15s;display:inline-block}
+    .btn-o:hover{border-color:rgba(255,255,255,.7);background:rgba(255,255,255,.05);text-decoration:none;color:#fff}
+    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .stat-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);padding:20px 16px;text-align:center}
+    .stat-num{display:block;font-size:28px;font-weight:700;color:#6ee7c5;font-family:var(--mono)}
+    .stat-lbl{display:block;font-size:11px;color:rgba(255,255,255,.45);margin-top:4px}
 
-<div class="header">
-  <div class="avatar">OS</div>
-  <div>
-    <div class="repo-name">ofer-sadeh-man / enterprise-implementations</div>
-    <div class="repo-sub">Technical portfolio: identity, APIs, integrations & automation</div>
-    <div style="margin-top:6px">
-      <span class="badge b-teal">Public</span>
-      <span class="badge b-blue">⭐ Portfolio</span>
-      <span class="badge b-purple">C# · REST · SAML · SQL</span>
+    /* ABOUT */
+    #about{background:var(--white)}
+    .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+    .about-text p{color:var(--muted);margin-bottom:16px;line-height:1.8;font-size:15px}
+    .award-card{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);margin-bottom:10px}
+    .award-icon{font-size:22px;flex-shrink:0}
+    .award-title{font-size:13px;font-weight:600;color:var(--text)}
+    .award-desc{font-size:12px;color:var(--muted);margin-top:2px}
+
+    /* EXPERIENCE */
+    #experience{background:var(--bg)}
+    .timeline{position:relative;padding-left:28px}
+    .timeline::before{content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:linear-gradient(to bottom,var(--teal),#ccc)}
+    .tl-item{position:relative;margin-bottom:36px}
+    .tl-item::before{content:'';position:absolute;left:-24px;top:10px;width:12px;height:12px;border-radius:50%;background:var(--teal);border:2px solid #fff;box-shadow:0 0 0 3px rgba(15,110,86,.2)}
+    .tl-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;transition:box-shadow .2s,transform .2s}
+    .tl-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+    .tl-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px;flex-wrap:wrap}
+    .tl-company{font-size:17px;font-weight:700;color:var(--text)}
+    .tl-company-sub{font-size:11px;color:var(--muted);font-weight:400}
+    .tl-role{font-size:14px;color:var(--teal);font-weight:600;margin-bottom:12px}
+    .tl-period{font-size:12px;font-family:var(--mono);background:var(--teal-l);color:var(--teal);padding:3px 10px;border-radius:20px;white-space:nowrap}
+    .tl-bullets{list-style:none;display:flex;flex-direction:column;gap:6px}
+    .tl-bullets li{font-size:13px;color:var(--muted);padding-left:16px;position:relative;line-height:1.5}
+    .tl-bullets li::before{content:'→';position:absolute;left:0;color:var(--teal);font-size:11px;top:1px}
+    .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+    .chip{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
+
+    /* SKILLS */
+    #skills{background:var(--white)}
+    .skill-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:32px}
+    .skill-group{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+    .skill-group-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+    .skill-icon{width:28px;height:28px;border-radius:6px;background:var(--teal-l);display:flex;align-items:center;justify-content:center;font-size:14px}
+    .tags{display:flex;flex-wrap:wrap;gap:6px}
+    .tag{font-size:12px;padding:4px 12px;border-radius:20px;background:var(--white);border:1px solid var(--border);color:var(--text);font-weight:500;transition:border-color .15s,color .15s,background .15s;cursor:default}
+    .tag:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-l)}
+
+    /* DEMOS */
+    #demos{background:var(--navy);padding:80px 0}
+    #demos .sec-label{color:#6ee7c5}
+    #demos h2{color:#fff}
+    .demos-intro{color:rgba(255,255,255,.5);max-width:560px;margin-bottom:48px;font-size:15px}
+    .demos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+    .demo-card{background:var(--navy-m);border:1px solid rgba(255,255,255,.08);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+    .demo-head{padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+    .demo-title{font-size:15px;font-weight:700;color:#fff}
+    .demo-sub{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
+    .live-badge{font-size:10px;font-weight:700;letter-spacing:.06em;background:rgba(110,231,197,.15);color:#6ee7c5;border:1px solid rgba(110,231,197,.3);padding:3px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+    .demo-body{padding:18px;flex:1;display:flex;flex-direction:column;gap:11px}
+    .d-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:3px}
+    .d-input{width:100%;background:var(--navy-l);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 11px;font-size:12px;font-family:var(--mono);color:#fff;outline:none;transition:border-color .15s}
+    .d-input:focus{border-color:var(--teal)}
+    .d-input::placeholder{color:rgba(255,255,255,.2)}
+    textarea.d-input{min-height:130px;resize:vertical;line-height:1.5}
+    .d-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .d-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--teal);color:#fff;border:none;border-radius:6px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;transition:background .15s,transform .1s;width:100%}
+    .d-btn:hover{background:var(--teal-d);transform:translateY(-1px)}
+    .d-btn-sec{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+    .d-btn-sec:hover{background:rgba(255,255,255,.1)}
+    .d-out{background:#061218;border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:12px;font-family:var(--mono);font-size:11px;color:#6ee7c5;min-height:60px;word-break:break-all;line-height:1.6;white-space:pre-wrap;overflow-x:auto}
+    .d-out.ph{color:rgba(255,255,255,.2);font-style:italic}
+    .json-panel{background:#061218;border:1px solid rgba(255,255,255,.06);border-radius:6px;overflow:hidden}
+    .json-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.06)}
+    .json-tab{font-size:11px;padding:6px 14px;color:rgba(255,255,255,.35);cursor:pointer;transition:color .15s,background .15s;border:none;background:none;font-family:var(--mono)}
+    .json-tab.active{color:#6ee7c5;background:rgba(110,231,197,.07)}
+    .json-body{padding:12px;font-family:var(--mono);font-size:11px;color:#6ee7c5;min-height:80px;white-space:pre;overflow-x:auto}
+    .json-body .jk{color:#85c1e9}.json-body .jv{color:#82e0aa}.json-body .jn{color:#f0b27a}
+    .d-expiry{font-size:11px;font-family:var(--mono);color:rgba(255,255,255,.3);text-align:right}
+    .d-expiry.ok{color:#6ee7c5}.d-expiry.bad{color:#f1948a}
+    .d-fields{display:flex;flex-direction:column;gap:6px}
+    .d-field{display:flex;gap:8px;align-items:flex-start;font-size:11px}
+    .d-fk{font-family:var(--mono);color:#85c1e9;width:85px;flex-shrink:0}
+    .d-fv{color:#82e0aa;font-family:var(--mono);word-break:break-all}
+    .v-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600}
+    .v-badge.ok{background:rgba(110,231,197,.15);color:#6ee7c5}
+    .v-badge.bad{background:rgba(241,148,138,.15);color:#f1948a}
+    .xslt-out{background:#fff;border-radius:6px;min-height:100px;max-height:220px;overflow-y:auto;font-size:12px;color:#1a1f2e;padding:12px}
+
+    /* CODE */
+    #code{background:var(--bg)}
+    .code-tabs-nav{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px;overflow-x:auto}
+    .code-tab{padding:9px 16px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:'Sora',sans-serif}
+    .code-tab.active{color:var(--teal);border-bottom-color:var(--teal)}
+    .code-tab:hover{color:var(--text)}
+    .code-panel{display:none}.code-panel.active{display:block}
+    .code-box{background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+    .code-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg)}
+    .code-fname{font-size:12px;font-weight:500;font-family:var(--mono);color:var(--muted)}
+    .code-acts{display:flex;gap:8px;align-items:center}
+    .try-btn{font-size:11px;padding:4px 12px;border-radius:20px;background:var(--teal-l);color:var(--teal);font-weight:600;border:none;cursor:pointer;font-family:'Sora',sans-serif;transition:background .15s}
+    .try-btn:hover{background:#c5ead8}
+    .copy-btn{font-size:11px;padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--muted);font-family:'Sora',sans-serif;transition:background .15s}
+    .copy-btn:hover{background:var(--bg)}
+    pre{padding:20px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.75;color:var(--text)}
+    .kw{color:#185FA5}.str{color:#3B6D11}.cmt{color:var(--muted);font-style:italic}.fn{color:#534AB7}.ty{color:#993C1D}.num{color:#854F0B}
+
+    /* EDUCATION */
+    #education{background:var(--white)}
+    .edu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:32px}
+    .edu-card{border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;background:var(--bg);transition:box-shadow .2s}
+    .edu-card:hover{box-shadow:var(--shadow)}
+    .edu-year{font-size:11px;font-family:var(--mono);color:var(--teal);font-weight:600;margin-bottom:6px}
+    .edu-deg{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+    .edu-school{font-size:12px;color:var(--muted)}
+    .edu-note{font-size:11px;color:var(--teal);margin-top:6px;font-style:italic}
+    .lang-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:32px}
+    .lang-badge{display:flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid var(--border);border-radius:24px;background:var(--white)}
+    .lang-name{font-size:13px;font-weight:600;color:var(--text)}
+    .lang-lvl{font-size:11px;color:var(--muted)}
+
+    /* CONTACT */
+    #contact{background:var(--navy);padding:80px 0}
+    #contact .sec-label{color:#6ee7c5}
+    #contact h2{color:#fff}
+    .contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:40px}
+    .contact-card{background:var(--navy-m);border:1px solid rgba(255,255,255,.08);border-radius:var(--r);padding:20px;display:flex;align-items:flex-start;gap:14px;transition:border-color .2s}
+    .contact-card:hover{border-color:var(--teal)}
+    .c-icon{font-size:18px;width:36px;height:36px;background:rgba(15,110,86,.2);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .c-lbl{font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em}
+    .c-val{font-size:13px;color:#fff;font-weight:500;margin-top:3px;word-break:break-all}
+    .c-val a{color:#6ee7c5}
+    .c-val a:hover{text-decoration:underline}
+
+    footer{background:var(--navy);border-top:1px solid rgba(255,255,255,.06);padding:24px 0;text-align:center}
+    footer p{font-size:12px;color:rgba(255,255,255,.3)}
+    footer a{color:rgba(255,255,255,.5)}
+
+    @media(max-width:900px){.hero-grid{grid-template-columns:1fr}.stat-grid{grid-template-columns:repeat(4,1fr)}.about-grid{grid-template-columns:1fr}.demos-grid{grid-template-columns:1fr}.hero-name{font-size:42px}}
+    @media(max-width:600px){h2{font-size:26px}.nav-links{display:none}.hero-name{font-size:34px}.stat-grid{grid-template-columns:1fr 1fr}section{padding:60px 0}}
+  </style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <div class="nav-inner">
+    <span class="nav-logo">OSM</span>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#experience">Experience</a>
+      <a href="#skills">Skills</a>
+      <a href="#demos" class="hl">&#9889; Live Demos</a>
+      <a href="#code">Code</a>
+      <a href="#education">Education</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <a href="mailto:ofer.man.om@gmail.com" class="nav-cta">Hire Me</a>
+  </div>
+</nav>
+
+<section id="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-badge">Open to opportunities</div>
+        <h1 class="hero-name"><em>Ofer</em> Sadeh Man</h1>
+        <p class="hero-sub">Implementation Manager</p>
+        <p class="hero-tagline">15 years bringing large, complex enterprise software implementations to fulfillment. Deep technical expertise meets a passion for customer-facing delivery.</p>
+        <div class="hero-btns">
+          <a href="mailto:ofer.man.om@gmail.com" class="btn-p">Get in touch</a>
+          <a href="#demos" class="btn-o">&#9889; See live demos</a>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><span class="stat-num">15+</span><span class="stat-lbl">Years experience</span></div>
+        <div class="stat-card"><span class="stat-num">&gt;$1M</span><span class="stat-lbl">Projects led</span></div>
+        <div class="stat-card"><span class="stat-num">#1</span><span class="stat-lbl">CSAT score</span></div>
+        <div class="stat-card"><span class="stat-num">3</span><span class="stat-lbl">Enterprise companies</span></div>
+      </div>
     </div>
   </div>
-</div>
+</section>
 
-<div class="stats-row">
-  <span class="stat"><span class="lang-dot" style="background:#178600"></span>C#</span>
-  <span class="stat"><span class="lang-dot" style="background:#e44b23"></span>HTML5</span>
-  <span class="stat"><span class="lang-dot" style="background:#f7df1e"></span>JavaScript</span>
-  <span class="stat"><span class="lang-dot" style="background:#336791"></span>SQL</span>
-  <span class="stat"><span class="lang-dot" style="background:#c76b29"></span>XML/XSLT</span>
-  <span class="stat">6 projects · 15+ years XP</span>
-</div>
-
-<div class="tabs">
-  <div class="tab active" onclick="switchTab('readme')">README</div>
-  <div class="tab" onclick="switchTab('jwt')">JWT / Auth</div>
-  <div class="tab" onclick="switchTab('saml')">SAML / SSO</div>
-  <div class="tab" onclick="switchTab('api')">REST API</div>
-  <div class="tab" onclick="switchTab('sql')">SQL</div>
-  <div class="tab" onclick="switchTab('xslt')">XML/XSLT</div>
-</div>
-
-<div id="readme" class="panel active">
-  <div class="readme-block">
-    <h3>Enterprise Implementation Portfolio</h3>
-    <p>15+ years of customer-facing technical implementations at DocuSign, Tipalti, and ClickSoftware (Salesforce). This repo contains working code samples covering the core technologies I use daily: identity & security, REST/SOAP API integrations, database design, and XML transformation.</p>
-    <ul>
-      <li><strong>JWT / Auth</strong> — Token generation, validation, and middleware in C#</li>
-      <li><strong>SAML / SSO</strong> — SAML 2.0 assertion parsing and Okta/Ping integration helpers</li>
-      <li><strong>REST API</strong> — DocuSign & Tipalti API wrappers with retry logic</li>
-      <li><strong>SQL</strong> — Reporting queries, auditing, and onboarding data pipelines</li>
-      <li><strong>XML / XSLT</strong> — Document transformation for e-signature workflows</li>
-    </ul>
+<section id="about">
+  <div class="container">
+    <p class="sec-label">About me</p>
+    <h2>Technical depth + customer passion</h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>A technical consultant with 15 years of experience bringing large, complex software implementations to fulfillment across three enterprise companies: Tipalti, DocuSign, and ClickSoftware (Salesforce).</p>
+        <p>My mix of deep technical expertise &mdash; spanning JWT authentication, SAML 2.0 SSO, REST/SOAP APIs, SQL Server, XML/XSLT, and CRM integrations &mdash; bundled with a genuine passion for customer-facing delivery is what drives consistent top performance.</p>
+        <p>I've worked across banking, bio-pharma, fintech, game studios, and tech startups globally, integrating with Salesforce, SAP, Workday, ServiceNow and more. I thrive in roles that bridge the technical and commercial worlds.</p>
+      </div>
+      <div>
+        <div class="award-card"><div class="award-icon">&#127942;</div><div><div class="award-title">Hero of the Company &mdash; April 2024</div><div class="award-desc">Tipalti company-wide recognition award</div></div></div>
+        <div class="award-card"><div class="award-icon">&#128176;</div><div><div class="award-title">Highest Revenue Team Member</div><div class="award-desc">Led enterprise accounts generating top team revenue</div></div></div>
+        <div class="award-card"><div class="award-icon">&#11088;</div><div><div class="award-title">Highest CSAT Score</div><div class="award-desc">Consistently ranked #1 for customer satisfaction</div></div></div>
+        <div class="award-card"><div class="award-icon">&#127891;</div><div><div class="award-title">Academic Excellence</div><div class="award-desc">Dean's Award x2 &middot; Faculty Outstanding Program Member</div></div></div>
+      </div>
+    </div>
   </div>
-  <div class="section-label" style="margin-top:1.25rem">Skills snapshot</div>
-  <div class="skill-grid">
-    <div class="skill-card"><div class="skill-card-title">Identity & Security</div><div class="skill-card-tags"><span class="tag">SAML</span><span class="tag">JWT</span><span class="tag">Okta</span><span class="tag">Ping</span><span class="tag">SSL</span><span class="tag">Kerberos</span></div></div>
-    <div class="skill-card"><div class="skill-card-title">Languages</div><div class="skill-card-tags"><span class="tag">C#/.NET</span><span class="tag">VBA</span><span class="tag">APEX</span><span class="tag">HTML5</span></div></div>
-    <div class="skill-card"><div class="skill-card-title">APIs</div><div class="skill-card-tags"><span class="tag">REST</span><span class="tag">SOAP</span><span class="tag">Salesforce</span><span class="tag">SAP</span><span class="tag">Workday</span></div></div>
-    <div class="skill-card"><div class="skill-card-title">Databases</div><div class="skill-card-tags"><span class="tag">SQL Server</span><span class="tag">Oracle</span><span class="tag">XML</span></div></div>
-    <div class="skill-card"><div class="skill-card-title">Platforms</div><div class="skill-card-tags"><span class="tag">Azure AD</span><span class="tag">Tomcat</span><span class="tag">ESRI/GIS</span><span class="tag">Linux</span></div></div>
-    <div class="skill-card"><div class="skill-card-title">Integrations</div><div class="skill-card-tags"><span class="tag">DocuSign</span><span class="tag">Tipalti</span><span class="tag">ServiceNow</span></div></div>
-  </div>
-</div>
+</section>
 
-<div id="jwt" class="panel">
-  <div class="section-label">JWT token service — C# / .NET</div>
-  <div class="file-list">
-    <div class="file-row active"><span class="file-icon">📄</span><span class="file-name">JwtTokenService.cs</span><span class="file-desc">Token generation + validation</span></div>
-    <div class="file-row"><span class="file-icon">📄</span><span class="file-name">JwtMiddleware.cs</span><span class="file-desc">ASP.NET request pipeline</span></div>
+<section id="experience">
+  <div class="container">
+    <p class="sec-label">Work history</p>
+    <h2>15 years of enterprise implementations</h2>
+    <div class="timeline" style="margin-top:36px">
+      <div class="tl-item">
+        <div class="tl-card">
+          <div class="tl-head">
+            <div><div class="tl-company">Tipalti <span class="tl-company-sub">(Automated Payment Solutions)</span></div><div class="tl-role">Customer Onboarding Manager</div></div>
+            <span class="tl-period">2020 &ndash; 2024</span>
+          </div>
+          <ul class="tl-bullets">
+            <li>Led &gt;$1M enterprise implementation projects, supporting customers across the globe</li>
+            <li>Played a key role in acquisition and merger process &mdash; overseeing implementation and setting up new internal processes</li>
+            <li>Served as lead mentor, bringing new talent up to speed across the team</li>
+            <li>Delivered across diverse industries: tech startups, game studios, biotech, fintech</li>
+          </ul>
+          <div class="chips">
+            <span class="chip" style="background:var(--amber-l);color:var(--amber)">&#127942; Hero of the Company</span>
+            <span class="chip" style="background:var(--green-l);color:var(--green)">&#128176; Highest Revenue</span>
+            <span class="chip" style="background:var(--blue-l);color:var(--blue)">&#11088; Highest CSAT</span>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-card">
+          <div class="tl-head">
+            <div><div class="tl-company">DocuSign <span class="tl-company-sub">($2.5B revenue &middot; 6,800 employees)</span></div><div class="tl-role">Customer Onboarding Manager</div></div>
+            <span class="tl-period">2016 &ndash; 2020</span>
+          </div>
+          <ul class="tl-bullets">
+            <li>Led complex implementations in cryptographic digital signing across SMBs through S&amp;P 500 enterprises</li>
+            <li>Developed deep expertise in banking and bio-pharma industries</li>
+            <li>Hands-on integration building: REST, SOAP, Salesforce, SAP, Workday, ServiceNow</li>
+            <li>Helped build internal methodologies and knowledgebase accelerating team onboarding</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-card">
+          <div class="tl-head">
+            <div><div class="tl-company">ClickSoftware <span class="tl-company-sub">(acquired by Salesforce)</span></div><div class="tl-role">Customer Onboarding Manager</div></div>
+            <span class="tl-period">2010 &ndash; 2016</span>
+          </div>
+          <ul class="tl-bullets">
+            <li>Solution design, architecture, and implementation for large enterprise customers</li>
+            <li>Oversaw full technical lifecycle: need assessment, design workshops, R&amp;D coordination, UAT management, delivery</li>
+            <li>Assisted with project, escalation, and crisis management</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tl-item" style="margin-bottom:0">
+        <div class="tl-card">
+          <div class="tl-head">
+            <div><div class="tl-company">Cordys</div><div class="tl-role">QA Engineer</div></div>
+            <span class="tl-period">2009 &ndash; 2010</span>
+          </div>
+          <ul class="tl-bullets"><li>Product core stabilization and rapid new features assimilation</li></ul>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="code-box">
-    <div class="code-header"><span class="code-title">JwtTokenService.cs</span><button class="copy-btn" onclick="copyCode('jwt-code')">Copy</button></div>
-    <pre id="jwt-code"><span class="kw">using</span> System;
+</section>
+
+<section id="skills">
+  <div class="container">
+    <p class="sec-label">Technical skills</p>
+    <h2>Full-stack implementation toolkit</h2>
+    <div class="skill-grid">
+      <div class="skill-group"><div class="skill-group-title"><div class="skill-icon">&#128187;</div>Software Development</div><div class="tags"><span class="tag">.NET / C#</span><span class="tag">HTML5</span><span class="tag">VBA</span><span class="tag">XML / XSLT</span><span class="tag">APEX</span><span class="tag">REST</span><span class="tag">SOAP</span><span class="tag">JavaScript</span></div></div>
+      <div class="skill-group"><div class="skill-group-title"><div class="skill-icon">&#128274;</div>Identity &amp; Security</div><div class="tags"><span class="tag">SAML 2.0</span><span class="tag">JWT</span><span class="tag">SSL / TLS</span><span class="tag">Cryptography</span><span class="tag">Okta</span><span class="tag">Ping Identity</span><span class="tag">Azure AD</span></div></div>
+      <div class="skill-group"><div class="skill-group-title"><div class="skill-icon">&#128450;</div>Data &amp; Platforms</div><div class="tags"><span class="tag">SQL Server</span><span class="tag">Oracle</span><span class="tag">ESRI / GIS</span><span class="tag">Tomcat</span><span class="tag">Android</span><span class="tag">UNIX</span></div></div>
+      <div class="skill-group"><div class="skill-group-title"><div class="skill-icon">&#128279;</div>CRM &amp; Integrations</div><div class="tags"><span class="tag">Salesforce</span><span class="tag">SAP</span><span class="tag">Workday</span><span class="tag">ServiceNow</span><span class="tag">DocuSign</span><span class="tag">Tipalti</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="demos">
+  <div class="container">
+    <p class="sec-label">Interactive coding demos</p>
+    <h2>See the code work &mdash; live</h2>
+    <p class="demos-intro">Three fully working applications running in your browser. No backend, no libraries. Each mirrors the actual C# implementation in the repo below.</p>
+    <div class="demos-grid">
+
+      <!-- JWT DEMO -->
+      <div class="demo-card">
+        <div class="demo-head">
+          <div><div class="demo-title">JWT Token Playground</div><div class="demo-sub">Web Crypto API &middot; HMAC-SHA256</div></div>
+          <span class="live-badge">&#9889; LIVE</span>
+        </div>
+        <div class="demo-body">
+          <div><div class="d-label">User ID</div><input class="d-input" id="jwt-uid" value="john.doe" placeholder="userId"></div>
+          <div class="d-row">
+            <div><div class="d-label">Role</div><input class="d-input" id="jwt-role" value="admin"></div>
+            <div><div class="d-label">Tenant ID</div><input class="d-input" id="jwt-tenant" value="acme-corp"></div>
+          </div>
+          <div class="d-row">
+            <div><div class="d-label">Secret Key</div><input class="d-input" id="jwt-secret" value="enterprise-secret-256!"></div>
+            <div><div class="d-label">Expiry (min)</div><input class="d-input" id="jwt-exp" type="number" value="60" min="1"></div>
+          </div>
+          <button class="d-btn" onclick="doGenerateJWT()">&#9654; Generate Token</button>
+          <div><div class="d-label">Signed JWT</div><div class="d-out ph" id="jwt-out">Token will appear here...</div></div>
+          <div class="json-panel" id="jwt-panel" style="display:none">
+            <div class="json-tabs">
+              <button class="json-tab active" onclick="showJwtTab('header',this)">Header</button>
+              <button class="json-tab" onclick="showJwtTab('payload',this)">Payload</button>
+            </div>
+            <div class="json-body" id="jwt-json"></div>
+          </div>
+          <div class="d-expiry" id="jwt-timer"></div>
+          <div class="d-row">
+            <button class="d-btn d-btn-sec" onclick="doCopyJWT(this)">Copy Token</button>
+            <button class="d-btn d-btn-sec" onclick="doClearJWT()">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SAML DEMO -->
+      <div class="demo-card">
+        <div class="demo-head">
+          <div><div class="demo-title">SAML Assertion Parser</div><div class="demo-sub">DOMParser &middot; XPath &middot; Namespace-aware</div></div>
+          <span class="live-badge">&#9889; LIVE</span>
+        </div>
+        <div class="demo-body">
+          <div><div class="d-label">SAML XML &mdash; edit &amp; re-parse</div><textarea class="d-input" id="saml-in" style="min-height:155px"></textarea></div>
+          <button class="d-btn" onclick="doParseSAML()">&#9654; Parse Assertion</button>
+          <div id="saml-fields" style="display:none">
+            <div class="d-label">Extracted Attributes</div>
+            <div class="json-panel"><div class="json-body d-fields" id="saml-attrs"></div></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+              <div class="d-label" style="margin:0">Status:</div>
+              <span class="v-badge" id="saml-status">&mdash;</span>
+            </div>
+          </div>
+          <div class="d-out ph" id="saml-err" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- XSLT DEMO -->
+      <div class="demo-card">
+        <div class="demo-head">
+          <div><div class="demo-title">XML &rarr; HTML Transformer</div><div class="demo-sub">XSLTProcessor &middot; DocuSign contract workflow</div></div>
+          <span class="live-badge">&#9889; LIVE</span>
+        </div>
+        <div class="demo-body">
+          <div><div class="d-label">Contract XML &mdash; editable</div><textarea class="d-input" id="xslt-in" style="min-height:190px"></textarea></div>
+          <button class="d-btn" onclick="doTransformXSLT()">&#9654; Transform to HTML</button>
+          <div id="xslt-wrap" style="display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <div class="d-label" style="margin:0">Rendered Output</div>
+              <button class="d-btn d-btn-sec" style="width:auto;padding:4px 12px;font-size:11px" onclick="doDownloadXSLT()">&#8595; Download</button>
+            </div>
+            <div class="xslt-out" id="xslt-out"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="code">
+  <div class="container">
+    <p class="sec-label">Source code</p>
+    <h2>Real implementations from the repo</h2>
+    <div class="code-tabs-nav" style="margin-top:32px">
+      <button class="code-tab active" onclick="switchCode('c-jwt',this)">JWT / Auth</button>
+      <button class="code-tab" onclick="switchCode('c-saml',this)">SAML / SSO</button>
+      <button class="code-tab" onclick="switchCode('c-api',this)">REST API</button>
+      <button class="code-tab" onclick="switchCode('c-sql',this)">SQL</button>
+      <button class="code-tab" onclick="switchCode('c-xslt',this)">XML / XSLT</button>
+    </div>
+
+    <div id="c-jwt" class="code-panel active">
+      <div class="code-box">
+        <div class="code-hdr"><span class="code-fname">JwtTokenService.cs</span><div class="code-acts"><button class="try-btn" onclick="location.href='#demos'">&#9654; Try it live</button><button class="copy-btn" onclick="copyCode('pre-jwt',this)">Copy</button></div></div>
+        <pre id="pre-jwt"><span class="kw">using</span> System;
 <span class="kw">using</span> System.IdentityModel.Tokens.Jwt;
 <span class="kw">using</span> System.Security.Claims;
 <span class="kw">using</span> Microsoft.IdentityModel.Tokens;
@@ -127,101 +450,72 @@
 
         <span class="kw">public</span> <span class="fn">JwtTokenService</span>(<span class="kw">string</span> secret, <span class="kw">int</span> expiryMinutes = 60)
         {
-            _secret = secret;
-            _expiryMinutes = expiryMinutes;
+            _secret = secret; _expiryMinutes = expiryMinutes;
         }
 
         <span class="cmt">// Generate a signed JWT for an authenticated enterprise user</span>
         <span class="kw">public string</span> <span class="fn">GenerateToken</span>(<span class="kw">string</span> userId, <span class="kw">string</span> role, <span class="kw">string</span> tenantId)
         {
-            <span class="kw">var</span> key = <span class="kw">new</span> <span class="ty">SymmetricSecurityKey</span>(
-                System.Text.Encoding.UTF8.<span class="fn">GetBytes</span>(_secret));
-            <span class="kw">var</span> creds = <span class="kw">new</span> <span class="ty">SigningCredentials</span>(
-                key, SecurityAlgorithms.HmacSha256);
-
-            <span class="kw">var</span> claims = <span class="kw">new</span>[]
-            {
+            <span class="kw">var</span> key   = <span class="kw">new</span> <span class="ty">SymmetricSecurityKey</span>(Encoding.UTF8.<span class="fn">GetBytes</span>(_secret));
+            <span class="kw">var</span> creds = <span class="kw">new</span> <span class="ty">SigningCredentials</span>(key, SecurityAlgorithms.HmacSha256);
+            <span class="kw">var</span> claims = <span class="kw">new</span>[] {
                 <span class="kw">new</span> <span class="ty">Claim</span>(JwtRegisteredClaimNames.Sub, userId),
                 <span class="kw">new</span> <span class="ty">Claim</span>(<span class="str">"role"</span>, role),
                 <span class="kw">new</span> <span class="ty">Claim</span>(<span class="str">"tenantId"</span>, tenantId),
-                <span class="kw">new</span> <span class="ty">Claim</span>(JwtRegisteredClaimNames.Jti,
-                    Guid.NewGuid().<span class="fn">ToString</span>())
+                <span class="kw">new</span> <span class="ty">Claim</span>(JwtRegisteredClaimNames.Jti, Guid.NewGuid().<span class="fn">ToString</span>())
             };
-
             <span class="kw">var</span> token = <span class="kw">new</span> <span class="ty">JwtSecurityToken</span>(
-                issuer: <span class="str">"enterprise-sso"</span>,
-                audience: <span class="str">"enterprise-apps"</span>,
-                claims: claims,
-                expires: DateTime.UtcNow.<span class="fn">AddMinutes</span>(_expiryMinutes),
+                issuer: <span class="str">"enterprise-sso"</span>, audience: <span class="str">"enterprise-apps"</span>,
+                claims: claims, expires: DateTime.UtcNow.<span class="fn">AddMinutes</span>(_expiryMinutes),
                 signingCredentials: creds);
-
             <span class="kw">return new</span> <span class="ty">JwtSecurityTokenHandler</span>().<span class="fn">WriteToken</span>(token);
         }
 
         <span class="cmt">// Validate token and extract principal</span>
         <span class="kw">public</span> <span class="ty">ClaimsPrincipal</span> <span class="fn">ValidateToken</span>(<span class="kw">string</span> token)
         {
-            <span class="kw">var</span> handler = <span class="kw">new</span> <span class="ty">JwtSecurityTokenHandler</span>();
-            <span class="kw">var</span> key = System.Text.Encoding.UTF8.<span class="fn">GetBytes</span>(_secret);
-
-            <span class="kw">return</span> handler.<span class="fn">ValidateToken</span>(token, <span class="kw">new</span> <span class="ty">TokenValidationParameters</span>
-            {
-                ValidateIssuerSigningKey = <span class="kw">true</span>,
-                IssuerSigningKey = <span class="kw">new</span> <span class="ty">SymmetricSecurityKey</span>(key),
-                ValidIssuer = <span class="str">"enterprise-sso"</span>,
-                ValidAudience = <span class="str">"enterprise-apps"</span>,
-                ClockSkew = TimeSpan.<span class="fn">FromSeconds</span>(<span class="num">30</span>)
-            }, <span class="kw">out</span> _);
+            <span class="kw">var</span> key = Encoding.UTF8.<span class="fn">GetBytes</span>(_secret);
+            <span class="kw">return new</span> <span class="ty">JwtSecurityTokenHandler</span>().<span class="fn">ValidateToken</span>(token,
+                <span class="kw">new</span> <span class="ty">TokenValidationParameters</span> {
+                    ValidateIssuerSigningKey = <span class="kw">true</span>,
+                    IssuerSigningKey = <span class="kw">new</span> <span class="ty">SymmetricSecurityKey</span>(key),
+                    ValidIssuer = <span class="str">"enterprise-sso"</span>, ValidAudience = <span class="str">"enterprise-apps"</span>,
+                    ClockSkew = TimeSpan.<span class="fn">FromSeconds</span>(<span class="num">30</span>)
+                }, <span class="kw">out</span> _);
         }
     }
 }</pre>
-  </div>
-</div>
+      </div>
+    </div>
 
-<div id="saml" class="panel">
-  <div class="section-label">SAML 2.0 SSO integration — C# / Okta / Ping Identity</div>
-  <div class="file-list">
-    <div class="file-row active"><span class="file-icon">📄</span><span class="file-name">SamlAssertionParser.cs</span><span class="file-desc">Parse & validate assertions</span></div>
-  </div>
-  <div class="code-box">
-    <div class="code-header"><span class="code-title">SamlAssertionParser.cs</span><button class="copy-btn" onclick="copyCode('saml-code')">Copy</button></div>
-    <pre id="saml-code"><span class="kw">using</span> System;
-<span class="kw">using</span> System.Xml;
+    <div id="c-saml" class="code-panel">
+      <div class="code-box">
+        <div class="code-hdr"><span class="code-fname">SamlAssertionParser.cs</span><div class="code-acts"><button class="try-btn" onclick="location.href='#demos'">&#9654; Try it live</button><button class="copy-btn" onclick="copyCode('pre-saml',this)">Copy</button></div></div>
+        <pre id="pre-saml"><span class="kw">using</span> System.Xml;
 <span class="kw">using</span> System.Security.Cryptography.X509Certificates;
 <span class="kw">using</span> System.Security.Cryptography.Xml;
 
 <span class="kw">namespace</span> <span class="ty">EnterpriseAuth</span>.Saml
 {
-    <span class="cmt">/// Validates a SAML 2.0 Response from Okta / Ping Identity IdPs.
-    /// Used in DocuSign and Tipalti SSO onboarding flows.</span>
+    <span class="cmt">/// Validates a SAML 2.0 Response from Okta / Ping Identity IdPs.</span>
     <span class="kw">public class</span> <span class="ty">SamlAssertionParser</span>
     {
-        <span class="kw">private readonly</span> <span class="ty">X509Certificate2</span> _idpCertificate;
+        <span class="kw">private readonly</span> <span class="ty">X509Certificate2</span> _idpCert;
 
         <span class="kw">public</span> <span class="fn">SamlAssertionParser</span>(<span class="kw">string</span> certBase64)
-        {
-            <span class="kw">var</span> certBytes = Convert.<span class="fn">FromBase64String</span>(certBase64);
-            _idpCertificate = <span class="kw">new</span> <span class="ty">X509Certificate2</span>(certBytes);
-        }
+            => _idpCert = <span class="kw">new</span> <span class="ty">X509Certificate2</span>(Convert.<span class="fn">FromBase64String</span>(certBase64));
 
         <span class="kw">public</span> <span class="ty">SamlUser</span> <span class="fn">Parse</span>(<span class="kw">string</span> samlResponseBase64)
         {
             <span class="kw">var</span> xml = <span class="kw">new</span> <span class="ty">XmlDocument</span> { PreserveWhitespace = <span class="kw">true</span> };
-            xml.<span class="fn">LoadXml</span>(System.Text.Encoding.UTF8.<span class="fn">GetString</span>(
-                Convert.<span class="fn">FromBase64String</span>(samlResponseBase64)));
-
+            xml.<span class="fn">LoadXml</span>(Encoding.UTF8.<span class="fn">GetString</span>(Convert.<span class="fn">FromBase64String</span>(samlResponseBase64)));
             <span class="fn">ValidateSignature</span>(xml);
-
             <span class="kw">var</span> ns = <span class="kw">new</span> <span class="ty">XmlNamespaceManager</span>(xml.NameTable);
-            ns.<span class="fn">AddNamespace</span>(<span class="str">"saml"</span>,
-                <span class="str">"urn:oasis:names:tc:SAML:2.0:assertion"</span>);
-
-            <span class="kw">return new</span> <span class="ty">SamlUser</span>
-            {
-                NameId = xml.<span class="fn">SelectSingleNode</span>(
-                    <span class="str">"//saml:NameID"</span>, ns)?.InnerText,
-                Email = <span class="fn">GetAttribute</span>(xml, ns, <span class="str">"email"</span>),
-                Role  = <span class="fn">GetAttribute</span>(xml, ns, <span class="str">"role"</span>),
+            ns.<span class="fn">AddNamespace</span>(<span class="str">"saml"</span>, <span class="str">"urn:oasis:names:tc:SAML:2.0:assertion"</span>);
+            <span class="kw">return new</span> <span class="ty">SamlUser</span> {
+                NameId   = xml.<span class="fn">SelectSingleNode</span>(<span class="str">"//saml:NameID"</span>, ns)?.InnerText,
+                Email    = <span class="fn">GetAttribute</span>(xml, ns, <span class="str">"email"</span>),
+                Role     = <span class="fn">GetAttribute</span>(xml, ns, <span class="str">"role"</span>),
                 TenantId = <span class="fn">GetAttribute</span>(xml, ns, <span class="str">"tenantId"</span>)
             };
         }
@@ -229,49 +523,24 @@
         <span class="kw">private void</span> <span class="fn">ValidateSignature</span>(<span class="ty">XmlDocument</span> doc)
         {
             <span class="kw">var</span> signed = <span class="kw">new</span> <span class="ty">SignedXml</span>(doc);
-            <span class="kw">var</span> sigNode = doc.<span class="fn">GetElementsByTagName</span>(<span class="str">"Signature"</span>)[<span class="num">0</span>]
-                <span class="kw">as</span> <span class="ty">XmlElement</span>;
-            signed.<span class="fn">LoadXml</span>(sigNode);
-
-            <span class="kw">if</span> (!signed.<span class="fn">CheckSignature</span>(_idpCertificate, <span class="kw">true</span>))
+            signed.<span class="fn">LoadXml</span>(doc.<span class="fn">GetElementsByTagName</span>(<span class="str">"Signature"</span>)[<span class="num">0</span>] <span class="kw">as</span> <span class="ty">XmlElement</span>);
+            <span class="kw">if</span> (!signed.<span class="fn">CheckSignature</span>(_idpCert, <span class="kw">true</span>))
                 <span class="kw">throw new</span> <span class="ty">SecurityException</span>(<span class="str">"Invalid SAML signature"</span>);
         }
 
-        <span class="kw">private string</span> <span class="fn">GetAttribute</span>(<span class="ty">XmlDocument</span> doc,
-            <span class="ty">XmlNamespaceManager</span> ns, <span class="kw">string</span> name)
-            => doc.<span class="fn">SelectSingleNode</span>(
-                $<span class="str">"//saml:Attribute[@Name='{name}']/saml:AttributeValue"</span>,
-                ns)?.InnerText;
-    }
-
-    <span class="kw">public class</span> <span class="ty">SamlUser</span>
-    {
-        <span class="kw">public string</span> NameId { <span class="kw">get</span>; <span class="kw">set</span>; }
-        <span class="kw">public string</span> Email  { <span class="kw">get</span>; <span class="kw">set</span>; }
-        <span class="kw">public string</span> Role   { <span class="kw">get</span>; <span class="kw">set</span>; }
-        <span class="kw">public string</span> TenantId { <span class="kw">get</span>; <span class="kw">set</span>; }
+        <span class="kw">private string</span> <span class="fn">GetAttribute</span>(<span class="ty">XmlDocument</span> d, <span class="ty">XmlNamespaceManager</span> ns, <span class="kw">string</span> name)
+            => d.<span class="fn">SelectSingleNode</span>($<span class="str">"//saml:Attribute[@Name='{name}']/saml:AttributeValue"</span>, ns)?.InnerText;
     }
 }</pre>
-  </div>
-</div>
+      </div>
+    </div>
 
-<div id="api" class="panel">
-  <div class="section-label">REST API client — DocuSign eSignature (C#)</div>
-  <div class="file-list">
-    <div class="file-row active"><span class="file-icon">📄</span><span class="file-name">DocuSignClient.cs</span><span class="file-desc">Send envelope, retry logic</span></div>
-  </div>
-  <div class="code-box">
-    <div class="code-header"><span class="code-title">DocuSignClient.cs</span><button class="copy-btn" onclick="copyCode('api-code')">Copy</button></div>
-    <pre id="api-code"><span class="kw">using</span> System;
-<span class="kw">using</span> System.Net.Http;
-<span class="kw">using</span> System.Text;
-<span class="kw">using</span> System.Text.Json;
-<span class="kw">using</span> System.Threading.Tasks;
-
-<span class="kw">namespace</span> <span class="ty">EnterpriseIntegrations</span>.DocuSign
+    <div id="c-api" class="code-panel">
+      <div class="code-box">
+        <div class="code-hdr"><span class="code-fname">DocuSignClient.cs</span><div class="code-acts"><button class="copy-btn" onclick="copyCode('pre-api',this)">Copy</button></div></div>
+        <pre id="pre-api"><span class="kw">namespace</span> <span class="ty">EnterpriseIntegrations</span>.DocuSign
 {
-    <span class="cmt">/// Lightweight DocuSign REST v2.1 client.
-    /// Handles JWT auth + exponential-backoff retries.</span>
+    <span class="cmt">/// Lightweight DocuSign REST v2.1 client with JWT auth + exponential-backoff retries.</span>
     <span class="kw">public class</span> <span class="ty">DocuSignClient</span>
     {
         <span class="kw">private readonly</span> <span class="ty">HttpClient</span> _http;
@@ -280,166 +549,96 @@
 
         <span class="kw">public</span> <span class="fn">DocuSignClient</span>(<span class="kw">string</span> accountId, <span class="kw">string</span> jwtSecret)
         {
-            _http = <span class="kw">new</span> <span class="ty">HttpClient</span>();
-            _baseUrl = $<span class="str">"https://na4.docusign.net/restapi/v2.1/accounts/{accountId}"</span>;
+            _http     = <span class="kw">new</span> <span class="ty">HttpClient</span>();
+            _baseUrl  = $<span class="str">"https://na4.docusign.net/restapi/v2.1/accounts/{accountId}"</span>;
             _tokenSvc = <span class="kw">new</span> <span class="ty">JwtTokenService</span>(jwtSecret);
         }
 
         <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="kw">string</span>&gt; <span class="fn">SendEnvelopeAsync</span>(
-            <span class="kw">string</span> recipientEmail,
-            <span class="kw">string</span> recipientName,
-            <span class="kw">byte</span>[] documentBytes,
-            <span class="kw">string</span> docName)
+            <span class="kw">string</span> recipientEmail, <span class="kw">string</span> recipientName, <span class="kw">byte</span>[] doc, <span class="kw">string</span> docName)
         {
-            <span class="kw">var</span> token = _tokenSvc.<span class="fn">GenerateToken</span>(
-                <span class="str">"integration-user"</span>, <span class="str">"sender"</span>, <span class="str">"default"</span>);
+            <span class="kw">var</span> token = _tokenSvc.<span class="fn">GenerateToken</span>(<span class="str">"integration-user"</span>, <span class="str">"sender"</span>, <span class="str">"default"</span>);
             _http.DefaultRequestHeaders.Authorization =
-                <span class="kw">new</span> System.Net.Http.Headers
-                    .<span class="ty">AuthenticationHeaderValue</span>(<span class="str">"Bearer"</span>, token);
+                <span class="kw">new</span> AuthenticationHeaderValue(<span class="str">"Bearer"</span>, token);
 
-            <span class="kw">var</span> payload = <span class="kw">new</span>
-            {
-                emailSubject = <span class="str">"Please sign this document"</span>,
-                status = <span class="str">"sent"</span>,
-                documents = <span class="kw">new</span>[] { <span class="kw">new</span> {
-                    documentBase64 = Convert.<span class="fn">ToBase64String</span>(documentBytes),
-                    name = docName, documentId = <span class="str">"1"</span>
-                }},
-                recipients = <span class="kw">new</span> {
-                    signers = <span class="kw">new</span>[] { <span class="kw">new</span> {
-                        email = recipientEmail,
-                        name = recipientName,
-                        recipientId = <span class="str">"1"</span>,
-                        tabs = <span class="kw">new</span> {
-                            signHereTabs = <span class="kw">new</span>[] { <span class="kw">new</span> {
-                                anchorString = <span class="str">"/sig1/"</span>,
-                                anchorUnits = <span class="str">"pixels"</span>
-                            }}
-                        }
-                    }}
-                }
+            <span class="kw">var</span> payload = <span class="kw">new</span> {
+                emailSubject = <span class="str">"Please sign this document"</span>, status = <span class="str">"sent"</span>,
+                documents = <span class="kw">new</span>[] { <span class="kw">new</span> { documentBase64 = Convert.<span class="fn">ToBase64String</span>(doc),
+                    name = docName, documentId = <span class="str">"1"</span> } },
+                recipients = <span class="kw">new</span> { signers = <span class="kw">new</span>[] { <span class="kw">new</span> {
+                    email = recipientEmail, name = recipientName, recipientId = <span class="str">"1"</span>,
+                    tabs = <span class="kw">new</span> { signHereTabs = <span class="kw">new</span>[] { <span class="kw">new</span> {
+                        anchorString = <span class="str">"/sig1/"</span>, anchorUnits = <span class="str">"pixels"</span> }} }
+                }}}
             };
-
-            <span class="kw">return await</span> <span class="fn">PostWithRetryAsync</span>(
-                $<span class="str">"{_baseUrl}/envelopes"</span>,
-                JsonSerializer.<span class="fn">Serialize</span>(payload));
+            <span class="kw">return await</span> <span class="fn">PostWithRetryAsync</span>($<span class="str">"{_baseUrl}/envelopes"</span>, JsonSerializer.<span class="fn">Serialize</span>(payload));
         }
 
-        <span class="kw">private async</span> <span class="ty">Task</span>&lt;<span class="kw">string</span>&gt; <span class="fn">PostWithRetryAsync</span>(
-            <span class="kw">string</span> url, <span class="kw">string</span> json, <span class="kw">int</span> maxRetries = <span class="num">3</span>)
+        <span class="kw">private async</span> <span class="ty">Task</span>&lt;<span class="kw">string</span>&gt; <span class="fn">PostWithRetryAsync</span>(<span class="kw">string</span> url, <span class="kw">string</span> json, <span class="kw">int</span> max = <span class="num">3</span>)
         {
-            <span class="kw">for</span> (<span class="kw">int</span> attempt = <span class="num">0</span>; attempt &lt; maxRetries; attempt++)
-            {
-                <span class="kw">var</span> content = <span class="kw">new</span> <span class="ty">StringContent</span>(
-                    json, Encoding.UTF8, <span class="str">"application/json"</span>);
-                <span class="kw">var</span> resp = <span class="kw">await</span> _http.<span class="fn">PostAsync</span>(url, content);
-
-                <span class="kw">if</span> (resp.IsSuccessStatusCode)
-                    <span class="kw">return await</span> resp.Content.<span class="fn">ReadAsStringAsync</span>();
-
-                <span class="kw">if</span> (attempt == maxRetries - <span class="num">1</span>) resp.<span class="fn">EnsureSuccessStatusCode</span>();
-                <span class="kw">await</span> Task.<span class="fn">Delay</span>(<span class="num">500</span> * (<span class="kw">int</span>)Math.<span class="fn">Pow</span>(<span class="num">2</span>, attempt));
+            <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; max; i++) {
+                <span class="kw">var</span> r = <span class="kw">await</span> _http.<span class="fn">PostAsync</span>(url, <span class="kw">new</span> <span class="ty">StringContent</span>(json, Encoding.UTF8, <span class="str">"application/json"</span>));
+                <span class="kw">if</span> (r.IsSuccessStatusCode) <span class="kw">return await</span> r.Content.<span class="fn">ReadAsStringAsync</span>();
+                <span class="kw">if</span> (i == max - <span class="num">1</span>) r.<span class="fn">EnsureSuccessStatusCode</span>();
+                <span class="kw">await</span> Task.<span class="fn">Delay</span>(<span class="num">500</span> * (<span class="kw">int</span>)Math.<span class="fn">Pow</span>(<span class="num">2</span>, i));
             }
             <span class="kw">return null</span>;
         }
     }
 }</pre>
-  </div>
-</div>
+      </div>
+    </div>
 
-<div id="sql" class="panel">
-  <div class="section-label">SQL — onboarding audit & reporting queries</div>
-  <div class="file-list">
-    <div class="file-row active"><span class="file-icon">📄</span><span class="file-name">onboarding_audit.sql</span><span class="file-desc">Customer progress report</span></div>
-  </div>
-  <div class="code-box">
-    <div class="code-header"><span class="code-title">onboarding_audit.sql — SQL Server</span><button class="copy-btn" onclick="copyCode('sql-code')">Copy</button></div>
-    <pre id="sql-code"><span class="cmt">-- Onboarding progress report per enterprise customer
--- Tracks milestones: kickoff → UAT → go-live
--- Used in Tipalti and DocuSign implementation dashboards</span>
+    <div id="c-sql" class="code-panel">
+      <div class="code-box">
+        <div class="code-hdr"><span class="code-fname">onboarding_audit.sql</span><div class="code-acts"><button class="copy-btn" onclick="copyCode('pre-sql',this)">Copy</button></div></div>
+        <pre id="pre-sql"><span class="cmt">-- Onboarding progress report per enterprise customer
+-- Tracks milestones: kickoff &rarr; UAT &rarr; go-live</span>
 
 <span class="kw">WITH</span> MilestoneProgress <span class="kw">AS</span> (
-    <span class="kw">SELECT</span>
-        c.CustomerID,
-        c.CompanyName,
-        c.ContractValue,
-        c.AssignedManager,
-        m.MilestoneName,
-        m.PlannedDate,
-        m.CompletedDate,
-        <span class="kw">CASE</span>
-            <span class="kw">WHEN</span> m.CompletedDate <span class="kw">IS NOT NULL</span>
-                <span class="kw">THEN</span> <span class="str">'Completed'</span>
-            <span class="kw">WHEN</span> m.PlannedDate &lt; <span class="fn">GETDATE</span>()
-                <span class="kw">THEN</span> <span class="str">'Overdue'</span>
-            <span class="kw">ELSE</span> <span class="str">'Pending'</span>
-        <span class="kw">END</span> <span class="kw">AS</span> Status,
-        <span class="fn">DATEDIFF</span>(<span class="kw">day</span>,
-            m.PlannedDate,
-            <span class="fn">ISNULL</span>(m.CompletedDate, <span class="fn">GETDATE</span>())) <span class="kw">AS</span> SlippageDays
+    <span class="kw">SELECT</span> c.CustomerID, c.CompanyName, c.ContractValue, c.AssignedManager,
+           m.MilestoneName, m.PlannedDate, m.CompletedDate,
+           <span class="kw">CASE</span>
+               <span class="kw">WHEN</span> m.CompletedDate <span class="kw">IS NOT NULL THEN</span> <span class="str">'Completed'</span>
+               <span class="kw">WHEN</span> m.PlannedDate &lt; <span class="fn">GETDATE</span>()    <span class="kw">THEN</span> <span class="str">'Overdue'</span>
+               <span class="kw">ELSE</span> <span class="str">'Pending'</span>
+           <span class="kw">END AS</span> Status,
+           <span class="fn">DATEDIFF</span>(<span class="kw">day</span>, m.PlannedDate, <span class="fn">ISNULL</span>(m.CompletedDate, <span class="fn">GETDATE</span>())) <span class="kw">AS</span> SlippageDays
     <span class="kw">FROM</span> Customers c
-    <span class="kw">INNER JOIN</span> OnboardingMilestones m
-        <span class="kw">ON</span> c.CustomerID = m.CustomerID
+    <span class="kw">INNER JOIN</span> OnboardingMilestones m <span class="kw">ON</span> c.CustomerID = m.CustomerID
     <span class="kw">WHERE</span> c.Status = <span class="str">'Active'</span>
 ),
 Summary <span class="kw">AS</span> (
-    <span class="kw">SELECT</span>
-        CustomerID,
-        CompanyName,
-        ContractValue,
-        AssignedManager,
-        <span class="fn">COUNT</span>(*) <span class="kw">AS</span> TotalMilestones,
-        <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> Status = <span class="str">'Completed'</span>
-            <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) <span class="kw">AS</span> CompletedCount,
-        <span class="fn">MAX</span>(<span class="kw">CASE WHEN</span> Status = <span class="str">'Overdue'</span>
-            <span class="kw">THEN</span> SlippageDays <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) <span class="kw">AS</span> MaxSlippage
+    <span class="kw">SELECT</span> CustomerID, CompanyName, ContractValue, AssignedManager,
+           <span class="fn">COUNT</span>(*) <span class="kw">AS</span> TotalMilestones,
+           <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> Status = <span class="str">'Completed'</span> <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) <span class="kw">AS</span> CompletedCount,
+           <span class="fn">MAX</span>(<span class="kw">CASE WHEN</span> Status = <span class="str">'Overdue'</span> <span class="kw">THEN</span> SlippageDays <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) <span class="kw">AS</span> MaxSlippage
     <span class="kw">FROM</span> MilestoneProgress
-    <span class="kw">GROUP BY</span>
-        CustomerID, CompanyName,
-        ContractValue, AssignedManager
+    <span class="kw">GROUP BY</span> CustomerID, CompanyName, ContractValue, AssignedManager
 )
-<span class="kw">SELECT</span>
-    CompanyName,
-    AssignedManager,
-    <span class="fn">FORMAT</span>(ContractValue, <span class="str">'C0'</span>) <span class="kw">AS</span> ContractValue,
-    <span class="fn">CONCAT</span>(CompletedCount, <span class="str">' / '</span>, TotalMilestones)
-        <span class="kw">AS</span> MilestoneProgress,
-    <span class="fn">CAST</span>(CompletedCount * <span class="num">100.0</span>
-        / TotalMilestones <span class="kw">AS</span> <span class="ty">INT</span>) <span class="kw">AS</span> PctComplete,
-    MaxSlippage <span class="kw">AS</span> MaxSlippageDays
+<span class="kw">SELECT</span> CompanyName, AssignedManager,
+       <span class="fn">FORMAT</span>(ContractValue, <span class="str">'C0'</span>) <span class="kw">AS</span> ContractValue,
+       <span class="fn">CONCAT</span>(CompletedCount, <span class="str">' / '</span>, TotalMilestones) <span class="kw">AS</span> MilestoneProgress,
+       <span class="fn">CAST</span>(CompletedCount * <span class="num">100.0</span> / TotalMilestones <span class="kw">AS</span> <span class="ty">INT</span>) <span class="kw">AS</span> PctComplete,
+       MaxSlippage <span class="kw">AS</span> MaxSlippageDays
 <span class="kw">FROM</span> Summary
 <span class="kw">ORDER BY</span> ContractValue <span class="kw">DESC</span>, PctComplete <span class="kw">ASC</span>;</pre>
-  </div>
-</div>
+      </div>
+    </div>
 
-<div id="xslt" class="panel">
-  <div class="section-label">XML / XSLT — document transformation for e-signature</div>
-  <div class="file-list">
-    <div class="file-row active"><span class="file-icon">📄</span><span class="file-name">contract_transform.xslt</span><span class="file-desc">XML → HTML signing doc</span></div>
-  </div>
-  <div class="code-box">
-    <div class="code-header"><span class="code-title">contract_transform.xslt</span><button class="copy-btn" onclick="copyCode('xslt-code')">Copy</button></div>
-    <pre id="xslt-code"><span class="cmt">&lt;!-- Transforms enterprise contract XML into a
-     signature-ready HTML document for DocuSign workflows --&gt;</span>
-<span class="kw">&lt;xsl:stylesheet</span>
-    <span class="fn">version</span>=<span class="str">"1.0"</span>
+    <div id="c-xslt" class="code-panel">
+      <div class="code-box">
+        <div class="code-hdr"><span class="code-fname">contract_transform.xslt</span><div class="code-acts"><button class="try-btn" onclick="location.href='#demos'">&#9654; Try it live</button><button class="copy-btn" onclick="copyCode('pre-xslt',this)">Copy</button></div></div>
+        <pre id="pre-xslt"><span class="cmt">&lt;!-- Transforms enterprise contract XML into a signature-ready HTML doc --&gt;</span>
+<span class="kw">&lt;xsl:stylesheet</span> <span class="fn">version</span>=<span class="str">"1.0"</span>
     <span class="fn">xmlns:xsl</span>=<span class="str">"http://www.w3.org/1999/XSL/Transform"</span>
     <span class="fn">xmlns:ct</span>=<span class="str">"urn:enterprise:contract:v1"</span><span class="kw">&gt;</span>
-
-  <span class="kw">&lt;xsl:output</span> <span class="fn">method</span>=<span class="str">"html"</span> <span class="fn">indent</span>=<span class="str">"yes"</span>
-      <span class="fn">encoding</span>=<span class="str">"UTF-8"</span><span class="kw">/&gt;</span>
-
+  <span class="kw">&lt;xsl:output</span> <span class="fn">method</span>=<span class="str">"html"</span> <span class="fn">indent</span>=<span class="str">"yes"</span><span class="kw">/&gt;</span>
   <span class="kw">&lt;xsl:template</span> <span class="fn">match</span>=<span class="str">"/ct:Contract"</span><span class="kw">&gt;</span>
     <span class="kw">&lt;html&gt;&lt;body</span> <span class="fn">style</span>=<span class="str">"font-family:Arial;max-width:720px"</span><span class="kw">&gt;</span>
-
-      <span class="kw">&lt;h1&gt;</span>
-        <span class="kw">&lt;xsl:value-of</span> <span class="fn">select</span>=<span class="str">"ct:Header/ct:Title"</span><span class="kw">/&gt;</span>
-      <span class="kw">&lt;/h1&gt;</span>
-
+      <span class="kw">&lt;h1&gt;&lt;xsl:value-of</span> <span class="fn">select</span>=<span class="str">"ct:Header/ct:Title"</span><span class="kw">/&gt;&lt;/h1&gt;</span>
       <span class="kw">&lt;table</span> <span class="fn">border</span>=<span class="str">"1"</span> <span class="fn">cellpadding</span>=<span class="str">"6"</span><span class="kw">&gt;</span>
-        <span class="kw">&lt;tr&gt;</span>
-          <span class="kw">&lt;th&gt;</span>Party<span class="kw">&lt;/th&gt;&lt;th&gt;</span>Role<span class="kw">&lt;/th&gt;&lt;th&gt;</span>Email<span class="kw">&lt;/th&gt;</span>
-        <span class="kw">&lt;/tr&gt;</span>
+        <span class="kw">&lt;tr&gt;&lt;th&gt;</span>Party<span class="kw">&lt;/th&gt;&lt;th&gt;</span>Role<span class="kw">&lt;/th&gt;&lt;th&gt;</span>Email<span class="kw">&lt;/th&gt;&lt;/tr&gt;</span>
         <span class="kw">&lt;xsl:for-each</span> <span class="fn">select</span>=<span class="str">"ct:Parties/ct:Party"</span><span class="kw">&gt;</span>
           <span class="kw">&lt;tr&gt;</span>
             <span class="kw">&lt;td&gt;&lt;xsl:value-of</span> <span class="fn">select</span>=<span class="str">"ct:Name"</span><span class="kw">/&gt;&lt;/td&gt;</span>
@@ -448,42 +647,225 @@ Summary <span class="kw">AS</span> (
           <span class="kw">&lt;/tr&gt;</span>
         <span class="kw">&lt;/xsl:for-each&gt;</span>
       <span class="kw">&lt;/table&gt;</span>
-
       <span class="kw">&lt;xsl:for-each</span> <span class="fn">select</span>=<span class="str">"ct:Clauses/ct:Clause"</span><span class="kw">&gt;</span>
-        <span class="kw">&lt;h3&gt;</span>
-          <span class="kw">&lt;xsl:value-of</span> <span class="fn">select</span>=<span class="str">"@number"</span><span class="kw">/&gt;</span>.
-          <span class="kw">&lt;xsl:value-of</span> <span class="fn">select</span>=<span class="str">"ct:Title"</span><span class="kw">/&gt;</span>
-        <span class="kw">&lt;/h3&gt;</span>
+        <span class="kw">&lt;h3&gt;&lt;xsl:value-of</span> <span class="fn">select</span>=<span class="str">"@number"</span><span class="kw">/&gt;</span>. <span class="kw">&lt;xsl:value-of</span> <span class="fn">select</span>=<span class="str">"ct:Title"</span><span class="kw">/&gt;&lt;/h3&gt;</span>
         <span class="kw">&lt;p&gt;&lt;xsl:value-of</span> <span class="fn">select</span>=<span class="str">"ct:Body"</span><span class="kw">/&gt;&lt;/p&gt;</span>
       <span class="kw">&lt;/xsl:for-each&gt;</span>
-
       <span class="cmt">&lt;!-- Anchor tag picked up by DocuSign tab detection --&gt;</span>
-      <span class="kw">&lt;p&gt;</span>Signature: <span class="kw">&lt;span</span>
-          <span class="fn">style</span>=<span class="str">"color:white"</span><span class="kw">&gt;</span>/sig1/<span class="kw">&lt;/span&gt;&lt;/p&gt;</span>
-
+      <span class="kw">&lt;p&gt;</span>Signature: <span class="kw">&lt;span</span> <span class="fn">style</span>=<span class="str">"color:white"</span><span class="kw">&gt;</span>/sig1/<span class="kw">&lt;/span&gt;&lt;/p&gt;</span>
     <span class="kw">&lt;/body&gt;&lt;/html&gt;</span>
   <span class="kw">&lt;/xsl:template&gt;</span>
-
 <span class="kw">&lt;/xsl:stylesheet&gt;</span></pre>
+      </div>
+    </div>
   </div>
-</div>
+</section>
+
+<section id="education">
+  <div class="container">
+    <p class="sec-label">Education</p>
+    <h2>Academic background</h2>
+    <div class="edu-grid">
+      <div class="edu-card"><div class="edu-year">2012</div><div class="edu-deg">C# Advanced Course</div><div class="edu-school">Professional development</div></div>
+      <div class="edu-card"><div class="edu-year">2012</div><div class="edu-deg">C# Developers Course</div><div class="edu-school">Professional development</div></div>
+      <div class="edu-card"><div class="edu-year">2006</div><div class="edu-deg">M.Sc. Biochemistry</div><div class="edu-school">Tel Aviv University &middot; GPA 91</div><div class="edu-note">Faculty Outstanding Program Member</div></div>
+      <div class="edu-card"><div class="edu-year">2003</div><div class="edu-deg">B.Sc. Biology (Honors)</div><div class="edu-school">Tel Aviv University &middot; GPA 92</div><div class="edu-note">Dean's Award &times;2 &middot; Faculty Outstanding Program Member</div></div>
+    </div>
+    <div class="lang-row" style="margin-top:40px">
+      <div style="width:100%;margin-bottom:6px"><p class="sec-label" style="margin:0">Languages</p></div>
+      <div class="lang-badge"><span class="lang-name">English</span>&nbsp;<span class="lang-lvl">Fluent</span></div>
+      <div class="lang-badge"><span class="lang-name">Hebrew</span>&nbsp;<span class="lang-lvl">Native</span></div>
+      <div class="lang-badge"><span class="lang-name">Vietnamese</span>&nbsp;<span class="lang-lvl">Basics</span></div>
+      <div class="lang-badge"><span class="lang-name">Spanish</span>&nbsp;<span class="lang-lvl">Beginner</span></div>
+      <div class="lang-badge"><span class="lang-name">Portuguese</span>&nbsp;<span class="lang-lvl">Beginner</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="container">
+    <p class="sec-label">Get in touch</p>
+    <h2>Let's work together</h2>
+    <div class="contact-grid">
+      <div class="contact-card"><div class="c-icon">&#9993;</div><div><div class="c-lbl">Email</div><div class="c-val"><a href="mailto:ofer.man.om@gmail.com">ofer.man.om@gmail.com</a></div></div></div>
+      <div class="contact-card"><div class="c-icon">&#128222;</div><div><div class="c-lbl">Phone</div><div class="c-val">+972 54 672 2588</div></div></div>
+      <div class="contact-card"><div class="c-icon">&#128188;</div><div><div class="c-lbl">LinkedIn</div><div class="c-val"><a href="https://www.linkedin.com/in/ofer-sadeh-man-60346582/" target="_blank">ofer-sadeh-man</a></div></div></div>
+      <div class="contact-card"><div class="c-icon">&#128205;</div><div><div class="c-lbl">Location</div><div class="c-val">Kiryat Ono, Israel</div></div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>Ofer Sadeh Man &middot; Implementation Manager &middot; <a href="https://github.com/ofermanom-hub/enterprise-implementations" target="_blank">GitHub Repo</a></p>
+  </div>
+</footer>
 
 <script>
-function switchTab(id){
-  document.querySelectorAll('.tab').forEach((t,i)=>{
-    const ids=['readme','jwt','saml','api','sql','xslt'];
-    t.classList.toggle('active', ids[i]===id);
-  });
-  document.querySelectorAll('.panel').forEach(p=>{
-    p.classList.toggle('active', p.id===id);
+window.addEventListener('scroll',function(){
+  document.getElementById('main-nav').classList.toggle('scrolled',window.scrollY>10);
+});
+
+function switchCode(id,btn){
+  document.querySelectorAll('.code-panel').forEach(function(p){p.classList.remove('active')});
+  document.querySelectorAll('.code-tab').forEach(function(t){t.classList.remove('active')});
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+function copyCode(id,btn){
+  navigator.clipboard.writeText(document.getElementById(id).innerText).then(function(){
+    var orig=btn.textContent; btn.textContent='Copied!';
+    setTimeout(function(){btn.textContent=orig},1500);
   });
 }
-function copyCode(id){
-  const el=document.getElementById(id);
-  const text=el.innerText;
-  navigator.clipboard.writeText(text).then(()=>{
-    const btns=document.querySelectorAll('.copy-btn');
-    btns.forEach(b=>{if(b.getAttribute('onclick').includes(id)){b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',1500);}});
+
+// JWT
+var _jwtData=null,_timerID=null;
+function b64url(data){
+  var b64;
+  if(data instanceof ArrayBuffer){b64=btoa(String.fromCharCode.apply(null,new Uint8Array(data)));}
+  else{b64=btoa(unescape(encodeURIComponent(JSON.stringify(data))));}
+  return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+function uuid(){
+  return([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,function(c){
+    return(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16);
   });
+}
+async function doGenerateJWT(){
+  var uid=document.getElementById('jwt-uid').value||'user';
+  var role=document.getElementById('jwt-role').value||'admin';
+  var tenant=document.getElementById('jwt-tenant').value||'default';
+  var secret=document.getElementById('jwt-secret').value||'secret';
+  var expMin=parseInt(document.getElementById('jwt-exp').value)||60;
+  var now=Math.floor(Date.now()/1000);
+  var header={alg:'HS256',typ:'JWT'};
+  var payload={sub:uid,role:role,tenantId:tenant,iss:'enterprise-sso',aud:'enterprise-apps',iat:now,exp:now+expMin*60,jti:uuid()};
+  var signingInput=b64url(header)+'.'+b64url(payload);
+  var key=await crypto.subtle.importKey('raw',new TextEncoder().encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']);
+  var sig=await crypto.subtle.sign('HMAC',key,new TextEncoder().encode(signingInput));
+  var token=signingInput+'.'+b64url(sig);
+  var out=document.getElementById('jwt-out');
+  out.classList.remove('ph'); out.textContent=token;
+  _jwtData={header:header,payload:payload,token:token};
+  document.getElementById('jwt-panel').style.display='block';
+  showJwtTab('header',document.querySelector('.json-tab'));
+  startTimer(payload.exp);
+}
+function showJwtTab(tab,btn){
+  document.querySelectorAll('.json-tab').forEach(function(t){t.classList.remove('active')});
+  if(btn)btn.classList.add('active');
+  if(!_jwtData)return;
+  var obj=tab==='header'?_jwtData.header:_jwtData.payload;
+  document.getElementById('jwt-json').innerHTML=hlJSON(obj);
+}
+function hlJSON(obj){
+  return JSON.stringify(obj,null,2)
+    .replace(/"([^"]+)":/g,'<span class="jk">"$1"</span>:')
+    .replace(/: "([^"]+)"/g,': <span class="jv">"$1"</span>')
+    .replace(/: (-?\d+(\.\d+)?)/g,': <span class="jn">$1</span>');
+}
+function startTimer(exp){
+  clearInterval(_timerID);
+  var el=document.getElementById('jwt-timer');
+  function tick(){
+    var rem=exp-Math.floor(Date.now()/1000);
+    if(rem>0){el.textContent='Expires in '+Math.floor(rem/60)+'m '+(rem%60)+'s';el.className='d-expiry ok';}
+    else{el.textContent='Token expired';el.className='d-expiry bad';clearInterval(_timerID);}
+  }
+  tick(); _timerID=setInterval(tick,1000);
+}
+function doCopyJWT(btn){
+  if(!_jwtData)return;
+  navigator.clipboard.writeText(_jwtData.token).then(function(){
+    var orig=btn.textContent; btn.textContent='Copied!';
+    setTimeout(function(){btn.textContent=orig},1500);
+  });
+}
+function doClearJWT(){
+  document.getElementById('jwt-out').textContent='Token will appear here...';
+  document.getElementById('jwt-out').classList.add('ph');
+  document.getElementById('jwt-panel').style.display='none';
+  document.getElementById('jwt-timer').textContent='';
+  clearInterval(_timerID); _jwtData=null;
+}
+
+// SAML
+var SAML_XML='<?xml version="1.0" encoding="UTF-8"?>\n<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"\n    xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"\n    ID="_response001" Version="2.0" IssueInstant="2024-01-15T10:30:00Z">\n  <saml:Issuer>https://acme.okta.com/app/saml</saml:Issuer>\n  <samlp:Status>\n    <samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>\n  </samlp:Status>\n  <saml:Assertion ID="_assertion001" Version="2.0" IssueInstant="2024-01-15T10:30:00Z">\n    <saml:Issuer>https://acme.okta.com/app/saml</saml:Issuer>\n    <saml:Subject>\n      <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">john.doe@acme.com</saml:NameID>\n    </saml:Subject>\n    <saml:Conditions NotBefore="2024-01-15T10:25:00Z" NotOnOrAfter="2027-01-15T10:35:00Z">\n      <saml:AudienceRestriction>\n        <saml:Audience>enterprise-apps</saml:Audience>\n      </saml:AudienceRestriction>\n    </saml:Conditions>\n    <saml:AttributeStatement>\n      <saml:Attribute Name="email">\n        <saml:AttributeValue>john.doe@acme.com</saml:AttributeValue>\n      </saml:Attribute>\n      <saml:Attribute Name="role">\n        <saml:AttributeValue>admin</saml:AttributeValue>\n      </saml:Attribute>\n      <saml:Attribute Name="tenantId">\n        <saml:AttributeValue>acme-corp-001</saml:AttributeValue>\n      </saml:Attribute>\n    </saml:AttributeStatement>\n  </saml:Assertion>\n</samlp:Response>';
+document.getElementById('saml-in').value=SAML_XML;
+
+function doParseSAML(){
+  var xml=document.getElementById('saml-in').value;
+  var errEl=document.getElementById('saml-err');
+  var fieldsEl=document.getElementById('saml-fields');
+  var parser=new DOMParser();
+  var doc=parser.parseFromString(xml,'text/xml');
+  if(doc.querySelector('parsererror')){
+    errEl.textContent='XML parse error — check your input';
+    errEl.classList.remove('ph'); errEl.style.display='block';
+    fieldsEl.style.display='none'; return;
+  }
+  errEl.style.display='none';
+  var SAML='urn:oasis:names:tc:SAML:2.0:assertion';
+  var SAMLP='urn:oasis:names:tc:SAML:2.0:protocol';
+  function ns(p){return p==='saml'?SAML:p==='samlp'?SAMLP:null;}
+  function xstr(expr){try{return doc.evaluate(expr,doc,ns,XPathResult.STRING_TYPE,null).stringValue.trim();}catch(e){return '';}}
+  function attr(name){return xstr("//saml:Attribute[@Name='"+name+"']/saml:AttributeValue");}
+  var fields=[
+    ['NameID',xstr('//saml:NameID')],
+    ['email',attr('email')],['role',attr('role')],['tenantId',attr('tenantId')],
+    ['issuer',xstr('//saml:Issuer')],['audience',xstr('//saml:Audience')],
+    ['notBefore',xstr('//@NotBefore')],['notOnOrAfter',xstr('//@NotOnOrAfter')]
+  ];
+  document.getElementById('saml-attrs').innerHTML=fields.map(function(f){
+    return '<div class="d-field"><span class="d-fk">'+f[0]+':</span><span class="d-fv">'+(f[1]||'(not found)')+'</span></div>';
+  }).join('');
+  var exp=xstr('//@NotOnOrAfter');
+  var valid=exp&&new Date(exp)>new Date();
+  var sb=document.getElementById('saml-status');
+  sb.textContent=valid?'✓ Valid assertion':'⚠ Expired assertion';
+  sb.className='v-badge '+(valid?'ok':'bad');
+  fieldsEl.style.display='block';
+}
+
+// XSLT
+var XSLT_TEXT='<?xml version="1.0" encoding="UTF-8"?><xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:ct="urn:enterprise:contract:v1"><xsl:output method="xml" indent="yes"/><xsl:template match="/ct:Contract"><div style="font-family:Arial,sans-serif;max-width:720px;color:#1a1f2e;padding:4px"><h2 style="font-size:18px;color:#0F6E56;border-bottom:2px solid #0F6E56;padding-bottom:8px;margin-bottom:14px"><xsl:value-of select="ct:Header/ct:Title"/></h2><h4 style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:6px">Parties</h4><table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:12px"><tr style="background:#f8fafb"><th style="border:1px solid #e2e8f0;padding:7px 10px;text-align:left">Party</th><th style="border:1px solid #e2e8f0;padding:7px 10px;text-align:left">Role</th><th style="border:1px solid #e2e8f0;padding:7px 10px;text-align:left">Email</th></tr><xsl:for-each select="ct:Parties/ct:Party"><tr><td style="border:1px solid #e2e8f0;padding:7px 10px"><xsl:value-of select="ct:Name"/></td><td style="border:1px solid #e2e8f0;padding:7px 10px"><xsl:value-of select="ct:Role"/></td><td style="border:1px solid #e2e8f0;padding:7px 10px"><xsl:value-of select="ct:Email"/></td></tr></xsl:for-each></table><h4 style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:10px">Clauses</h4><xsl:for-each select="ct:Clauses/ct:Clause"><div style="margin-bottom:12px"><h5 style="font-size:13px;font-weight:600;margin-bottom:3px"><xsl:value-of select="@number"/>. <xsl:value-of select="ct:Title"/></h5><p style="font-size:12px;color:#64748b;margin:0;line-height:1.6"><xsl:value-of select="ct:Body"/></p></div></xsl:for-each><div style="margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:12px;color:#64748b">Signature: <span style="color:white;background:white">/sig1/</span><span style="color:#94a3b8;font-size:10px;margin-left:6px">(DocuSign anchor)</span></div></div></xsl:template></xsl:stylesheet>';
+
+var CONTRACT_XML='<?xml version="1.0" encoding="UTF-8"?>\n<ct:Contract xmlns:ct="urn:enterprise:contract:v1">\n  <ct:Header>\n    <ct:Title>Enterprise SaaS Implementation Agreement</ct:Title>\n  </ct:Header>\n  <ct:Parties>\n    <ct:Party>\n      <ct:Name>Acme Corporation</ct:Name>\n      <ct:Role>Customer</ct:Role>\n      <ct:Email>legal@acme.com</ct:Email>\n    </ct:Party>\n    <ct:Party>\n      <ct:Name>Tipalti Inc.</ct:Name>\n      <ct:Role>Vendor</ct:Role>\n      <ct:Email>contracts@tipalti.com</ct:Email>\n    </ct:Party>\n  </ct:Parties>\n  <ct:Clauses>\n    <ct:Clause number="1">\n      <ct:Title>Scope of Services</ct:Title>\n      <ct:Body>Vendor shall provide automated payment solutions including onboarding, configuration, and integration support as detailed in the Statement of Work.</ct:Body>\n    </ct:Clause>\n    <ct:Clause number="2">\n      <ct:Title>Implementation Timeline</ct:Title>\n      <ct:Body>Implementation shall be completed within 90 days of contract execution, subject to customer cooperation and timely provision of required access.</ct:Body>\n    </ct:Clause>\n    <ct:Clause number="3">\n      <ct:Title>Confidentiality</ct:Title>\n      <ct:Body>Both parties agree to maintain strict confidentiality of all proprietary information shared during the implementation process.</ct:Body>\n    </ct:Clause>\n  </ct:Clauses>\n</ct:Contract>';
+document.getElementById('xslt-in').value=CONTRACT_XML;
+
+var _xsltResult=null;
+function doTransformXSLT(){
+  var xmlText=document.getElementById('xslt-in').value;
+  var wrap=document.getElementById('xslt-wrap');
+  var out=document.getElementById('xslt-out');
+  try{
+    var parser=new DOMParser();
+    var xmlDoc=parser.parseFromString(xmlText,'text/xml');
+    var xsltDoc=parser.parseFromString(XSLT_TEXT,'text/xml');
+    if(xmlDoc.querySelector('parsererror'))throw new Error('Invalid XML input');
+    if(xsltDoc.querySelector('parsererror'))throw new Error('XSLT parse error');
+    var proc=new XSLTProcessor();
+    proc.importStylesheet(xsltDoc);
+    var result=proc.transformToDocument(xmlDoc);
+    var serial=new XMLSerializer().serializeToString(result);
+    _xsltResult=serial;
+    wrap.style.display='block';
+    var tmp=document.createElement('div');
+    tmp.innerHTML=serial;
+    out.innerHTML='';
+    out.appendChild(tmp);
+  }catch(e){
+    wrap.style.display='block';
+    out.innerHTML='<span style="color:#f1948a">Error: '+e.message+'</span>';
+  }
+}
+function doDownloadXSLT(){
+  if(!_xsltResult)return;
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([_xsltResult],{type:'text/html'}));
+  a.download='contract.html'; a.click();
 }
 </script>
+</body>
+</html>
