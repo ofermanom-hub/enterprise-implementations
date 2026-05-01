@@ -49,7 +49,7 @@
     /* HERO */
     #hero{background:linear-gradient(135deg,var(--navy) 0%,#0d3d2e 100%);padding:100px 0;color:#fff;position:relative;overflow:hidden}
     #hero::before{content:'';position:absolute;top:-40%;right:-8%;width:500px;height:500px;background:radial-gradient(circle,rgba(15,110,86,.3) 0%,transparent 70%);border-radius:50%}
-    .hero-grid{display:grid;grid-template-columns:1fr 320px;gap:60px;align-items:center;position:relative}
+    .hero-grid{display:grid;grid-template-columns:1fr 300px;gap:60px;align-items:center;position:relative}
     .hero-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;background:rgba(15,110,86,.3);color:#6ee7c5;border:1px solid rgba(15,110,86,.6);padding:4px 12px;border-radius:20px;margin-bottom:20px}
     .hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:#6ee7c5;animation:blink 2s infinite}
     @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
@@ -62,7 +62,13 @@
     .btn-p:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(15,110,86,.4);text-decoration:none;color:#fff}
     .btn-o{background:transparent;color:#fff;padding:12px 28px;border-radius:8px;font-weight:500;font-size:14px;border:1.5px solid rgba(255,255,255,.3);transition:border-color .15s,background .15s;display:inline-block}
     .btn-o:hover{border-color:rgba(255,255,255,.7);background:rgba(255,255,255,.05);text-decoration:none;color:#fff}
-    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+    /* PROFILE PHOTO */
+    .hero-right{display:flex;flex-direction:column;align-items:center;gap:20px}
+    .profile-ring{width:128px;height:128px;border-radius:50%;background:linear-gradient(135deg,#6ee7c5 0%,#185FA5 100%);padding:3px;margin:0 auto;flex-shrink:0}
+    .profile-inner{width:100%;height:100%;border-radius:50%;overflow:hidden;background:#0d2235;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:700;color:#6ee7c5;font-family:var(--mono);letter-spacing:-1px;user-select:none}
+    .profile-inner img{width:100%;height:100%;object-fit:cover;display:block}
+    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
     .stat-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);padding:20px 16px;text-align:center}
     .stat-num{display:block;font-size:28px;font-weight:700;color:#6ee7c5;font-family:var(--mono)}
     .stat-lbl{display:block;font-size:11px;color:rgba(255,255,255,.45);margin-top:4px}
@@ -144,7 +150,8 @@
     .v-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600}
     .v-badge.ok{background:rgba(110,231,197,.15);color:#6ee7c5}
     .v-badge.bad{background:rgba(241,148,138,.15);color:#f1948a}
-    .xslt-out{background:#fff;border-radius:6px;min-height:100px;max-height:220px;overflow-y:auto;font-size:12px;color:#1a1f2e;padding:12px}
+    .xslt-out{border-radius:6px;min-height:100px;overflow:hidden}
+    .xslt-out iframe{width:100%;border:none;display:block;border-radius:6px;min-height:100px;background:#fff}
 
     /* CODE */
     #code{background:var(--bg)}
@@ -230,11 +237,20 @@
           <a href="#demos" class="btn-o">&#9889; See live demos</a>
         </div>
       </div>
-      <div class="stat-grid">
-        <div class="stat-card"><span class="stat-num">15+</span><span class="stat-lbl">Years experience</span></div>
-        <div class="stat-card"><span class="stat-num">&gt;$1M</span><span class="stat-lbl">Projects led</span></div>
-        <div class="stat-card"><span class="stat-num">#1</span><span class="stat-lbl">CSAT score</span></div>
-        <div class="stat-card"><span class="stat-num">3</span><span class="stat-lbl">Enterprise companies</span></div>
+      <div class="hero-right">
+        <div class="profile-ring">
+          <div class="profile-inner" id="profile-photo">
+            <!-- To show a real photo, replace this element's content with:
+                 <img src="photo.jpg" alt="Ofer Sadeh Man"> -->
+            OSM
+          </div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card"><span class="stat-num">15+</span><span class="stat-lbl">Years experience</span></div>
+          <div class="stat-card"><span class="stat-num">&gt;$1M</span><span class="stat-lbl">Projects led</span></div>
+          <div class="stat-card"><span class="stat-num">#1</span><span class="stat-lbl">CSAT score</span></div>
+          <div class="stat-card"><span class="stat-num">3</span><span class="stat-lbl">Enterprise companies</span></div>
+        </div>
       </div>
     </div>
   </div>
@@ -341,7 +357,7 @@
   <div class="container">
     <p class="sec-label">Interactive coding demos</p>
     <h2>See the code work &mdash; live</h2>
-    <p class="demos-intro">Three fully working applications running in your browser. No backend, no libraries. Each mirrors the actual C# implementation in the repo below.</p>
+    <p class="demos-intro">Six fully working tools running entirely in your browser. No backend, no libraries, no API keys. Each mirrors real implementation patterns from the repo below.</p>
     <div class="demos-grid">
 
       <!-- JWT DEMO -->
@@ -414,6 +430,61 @@
             </div>
             <div class="xslt-out" id="xslt-out"></div>
           </div>
+        </div>
+      </div>
+
+      <!-- BASE64 DEMO -->
+      <div class="demo-card">
+        <div class="demo-head">
+          <div><div class="demo-title">Base64 Encoder / Decoder</div><div class="demo-sub">SAML payloads &middot; API docs &middot; File uploads</div></div>
+          <span class="live-badge">&#9889; LIVE</span>
+        </div>
+        <div class="demo-body">
+          <div><div class="d-label">Input &mdash; plain text or base64</div><textarea class="d-input" id="b64-in" style="min-height:100px" placeholder="Paste text to encode, or base64 to decode..."></textarea></div>
+          <div class="d-row">
+            <button class="d-btn" onclick="doB64Encode()">&#9654; Encode</button>
+            <button class="d-btn d-btn-sec" onclick="doB64Decode()">&#9668; Decode</button>
+          </div>
+          <div><div class="d-label">Output</div><div class="d-out ph" id="b64-out">Result will appear here...</div></div>
+          <div class="d-expiry" id="b64-info"></div>
+          <button class="d-btn d-btn-sec" onclick="doClearB64()">Clear</button>
+        </div>
+      </div>
+
+      <!-- HMAC DEMO -->
+      <div class="demo-card">
+        <div class="demo-head">
+          <div><div class="demo-title">HMAC-SHA256 Signer</div><div class="demo-sub">Web Crypto API &middot; Webhooks &middot; API auth</div></div>
+          <span class="live-badge">&#9889; LIVE</span>
+        </div>
+        <div class="demo-body">
+          <div><div class="d-label">Message / Payload</div><textarea class="d-input" id="hmac-msg" style="min-height:80px" placeholder="Any text &mdash; e.g. a webhook body or API request"></textarea></div>
+          <div><div class="d-label">Secret Key</div><input class="d-input" id="hmac-key" value="my-webhook-secret-key" placeholder="Secret key"></div>
+          <button class="d-btn" onclick="doHMAC()">&#9654; Sign</button>
+          <div><div class="d-label">Hex Signature</div><div class="d-out ph" id="hmac-hex">Signature will appear here...</div></div>
+          <div id="hmac-b64-row" style="display:none">
+            <div class="d-label">Base64url</div>
+            <div class="d-out" id="hmac-b64" style="min-height:40px"></div>
+          </div>
+          <button class="d-btn d-btn-sec" onclick="doClearHMAC()">Clear</button>
+        </div>
+      </div>
+
+      <!-- JSON FORMATTER DEMO -->
+      <div class="demo-card">
+        <div class="demo-head">
+          <div><div class="demo-title">JSON Formatter &amp; Validator</div><div class="demo-sub">REST payloads &middot; Pretty-print &middot; Minify</div></div>
+          <span class="live-badge">&#9889; LIVE</span>
+        </div>
+        <div class="demo-body">
+          <div><div class="d-label">Raw JSON</div><textarea class="d-input" id="jsonf-in" style="min-height:130px" placeholder='{"key":"value","arr":[1,2,3]}'></textarea></div>
+          <div class="d-row">
+            <button class="d-btn" onclick="doJSONFormat()">&#9654; Format</button>
+            <button class="d-btn d-btn-sec" onclick="doJSONMinify()">&#9650; Minify</button>
+          </div>
+          <div><div class="d-label">Output</div><div class="d-out ph" id="jsonf-out" style="min-height:80px">Formatted JSON will appear here...</div></div>
+          <div class="d-expiry" id="jsonf-info"></div>
+          <button class="d-btn d-btn-sec" onclick="doClearJSONF()">Clear</button>
         </div>
       </div>
 
@@ -719,6 +790,11 @@ function copyCode(id,btn){
   });
 }
 
+// Escape HTML to prevent XSS when inserting user-derived content into innerHTML
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 // JWT
 var _jwtData=null,_timerID=null;
 function b64url(data){
@@ -817,8 +893,9 @@ function doParseSAML(){
     ['issuer',xstr('//saml:Issuer')],['audience',xstr('//saml:Audience')],
     ['notBefore',xstr('//@NotBefore')],['notOnOrAfter',xstr('//@NotOnOrAfter')]
   ];
+  // Use escHtml to prevent XSS from crafted XML attribute values
   document.getElementById('saml-attrs').innerHTML=fields.map(function(f){
-    return '<div class="d-field"><span class="d-fk">'+f[0]+':</span><span class="d-fv">'+(f[1]||'(not found)')+'</span></div>';
+    return '<div class="d-field"><span class="d-fk">'+escHtml(f[0])+':</span><span class="d-fv">'+escHtml(f[1]||'(not found)')+'</span></div>';
   }).join('');
   var exp=xstr('//@NotOnOrAfter');
   var valid=exp&&new Date(exp)>new Date();
@@ -851,13 +928,26 @@ function doTransformXSLT(){
     var serial=new XMLSerializer().serializeToString(result);
     _xsltResult=serial;
     wrap.style.display='block';
-    var tmp=document.createElement('div');
-    tmp.innerHTML=serial;
+    // Render inside a sandboxed iframe — prevents script execution in transformed output
     out.innerHTML='';
-    out.appendChild(tmp);
+    var frame=document.createElement('iframe');
+    frame.setAttribute('sandbox','allow-same-origin');
+    frame.style.cssText='width:100%;border:none;border-radius:6px;min-height:80px;max-height:220px;display:block;background:#fff';
+    out.appendChild(frame);
+    frame.srcdoc=serial;
+    frame.addEventListener('load',function(){
+      try{
+        var h=frame.contentDocument.documentElement.scrollHeight||frame.contentDocument.body.scrollHeight;
+        frame.style.height=Math.min(Math.max(h+10,80),220)+'px';
+      }catch(e){}
+    });
   }catch(e){
     wrap.style.display='block';
-    out.innerHTML='<span style="color:#f1948a">Error: '+e.message+'</span>';
+    out.innerHTML='';
+    var errSpan=document.createElement('span');
+    errSpan.style.cssText='color:#f1948a;font-family:var(--mono,monospace);font-size:11px;padding:12px;display:block';
+    errSpan.textContent='Error: '+e.message;
+    out.appendChild(errSpan);
   }
 }
 function doDownloadXSLT(){
@@ -865,6 +955,115 @@ function doDownloadXSLT(){
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([_xsltResult],{type:'text/html'}));
   a.download='contract.html'; a.click();
+}
+
+// BASE64
+function doB64Encode(){
+  var input=document.getElementById('b64-in').value;
+  if(!input)return;
+  try{
+    var out=btoa(unescape(encodeURIComponent(input)));
+    setB64Out(out,'Encoded: '+input.length+' chars → '+out.length+' base64 chars');
+  }catch(e){setB64Out('Error: '+e.message,'');}
+}
+function doB64Decode(){
+  var input=document.getElementById('b64-in').value.trim();
+  if(!input)return;
+  try{
+    var out=decodeURIComponent(escape(atob(input)));
+    setB64Out(out,'Decoded: '+input.length+' base64 chars → '+out.length+' chars');
+  }catch(e){setB64Out('Error: invalid base64 — check input','');}
+}
+function setB64Out(text,info){
+  var el=document.getElementById('b64-out');
+  el.textContent=text;
+  el.classList.remove('ph');
+  document.getElementById('b64-info').textContent=info;
+}
+function doClearB64(){
+  document.getElementById('b64-in').value='';
+  var el=document.getElementById('b64-out');
+  el.textContent='Result will appear here...';
+  el.classList.add('ph');
+  document.getElementById('b64-info').textContent='';
+}
+
+// HMAC-SHA256
+async function doHMAC(){
+  var msg=document.getElementById('hmac-msg').value;
+  var key=document.getElementById('hmac-key').value||'secret';
+  var hexEl=document.getElementById('hmac-hex');
+  if(!msg){hexEl.textContent='Enter a message first';hexEl.classList.remove('ph');return;}
+  try{
+    var k=await crypto.subtle.importKey('raw',new TextEncoder().encode(key),{name:'HMAC',hash:'SHA-256'},false,['sign']);
+    var sig=await crypto.subtle.sign('HMAC',k,new TextEncoder().encode(msg));
+    var bytes=new Uint8Array(sig);
+    var hex=Array.from(bytes).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
+    var b64=btoa(String.fromCharCode.apply(null,bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+    hexEl.textContent=hex;
+    hexEl.classList.remove('ph');
+    document.getElementById('hmac-b64').textContent=b64;
+    document.getElementById('hmac-b64-row').style.display='block';
+  }catch(e){
+    hexEl.textContent='Error: '+e.message;
+    hexEl.classList.remove('ph');
+  }
+}
+function doClearHMAC(){
+  document.getElementById('hmac-msg').value='';
+  var el=document.getElementById('hmac-hex');
+  el.textContent='Signature will appear here...';
+  el.classList.add('ph');
+  document.getElementById('hmac-b64-row').style.display='none';
+}
+
+// JSON FORMATTER
+function doJSONFormat(){
+  var input=document.getElementById('jsonf-in').value.trim();
+  if(!input)return;
+  var infoEl=document.getElementById('jsonf-info');
+  var outEl=document.getElementById('jsonf-out');
+  try{
+    var parsed=JSON.parse(input);
+    var formatted=JSON.stringify(parsed,null,2);
+    outEl.textContent=formatted;
+    outEl.classList.remove('ph');
+    var keyCount=(JSON.stringify(parsed).match(/"[^"]*"\s*:/g)||[]).length;
+    infoEl.textContent='✓ Valid JSON · '+keyCount+' keys · '+formatted.length+' chars formatted';
+    infoEl.className='d-expiry ok';
+  }catch(e){
+    outEl.textContent='Error: '+e.message;
+    outEl.classList.remove('ph');
+    infoEl.textContent='✗ Invalid JSON';
+    infoEl.className='d-expiry bad';
+  }
+}
+function doJSONMinify(){
+  var input=document.getElementById('jsonf-in').value.trim();
+  if(!input)return;
+  var infoEl=document.getElementById('jsonf-info');
+  var outEl=document.getElementById('jsonf-out');
+  try{
+    var minified=JSON.stringify(JSON.parse(input));
+    outEl.textContent=minified;
+    outEl.classList.remove('ph');
+    infoEl.textContent='✓ Minified · '+minified.length+' chars';
+    infoEl.className='d-expiry ok';
+  }catch(e){
+    outEl.textContent='Error: '+e.message;
+    outEl.classList.remove('ph');
+    infoEl.textContent='✗ Invalid JSON';
+    infoEl.className='d-expiry bad';
+  }
+}
+function doClearJSONF(){
+  document.getElementById('jsonf-in').value='';
+  var el=document.getElementById('jsonf-out');
+  el.textContent='Formatted JSON will appear here...';
+  el.classList.add('ph');
+  var infoEl=document.getElementById('jsonf-info');
+  infoEl.textContent='';
+  infoEl.className='d-expiry';
 }
 </script>
 </body>
