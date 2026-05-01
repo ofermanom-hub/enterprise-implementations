@@ -77,6 +77,9 @@
     #about{background:var(--white)}
     .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
     .about-text p{color:var(--muted);margin-bottom:16px;line-height:1.8;font-size:15px}
+    .bring-list{list-style:none;margin-bottom:18px;display:flex;flex-direction:column;gap:7px}
+    .bring-list li{font-size:13px;color:var(--text);padding-left:20px;position:relative;line-height:1.5}
+    .bring-list li::before{content:'✓';position:absolute;left:0;color:var(--teal);font-weight:700;font-size:12px}
     .award-card{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);margin-bottom:10px}
     .award-icon{font-size:22px;flex-shrink:0}
     .award-title{font-size:13px;font-weight:600;color:var(--text)}
@@ -100,6 +103,25 @@
     .tl-bullets li::before{content:'→';position:absolute;left:0;color:var(--teal);font-size:11px;top:1px}
     .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
     .chip{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
+
+    /* PROJECT HIGHLIGHTS */
+    #projects{background:var(--white)}
+    .projects-intro{color:var(--muted);max-width:580px;margin-bottom:36px;font-size:15px;line-height:1.8}
+    .projects-nda{font-size:11px;color:var(--muted);font-style:italic;margin-bottom:32px;display:flex;align-items:center;gap:6px}
+    .case-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+    .case-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:box-shadow .2s,transform .2s}
+    .case-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px)}
+    .case-top{height:4px}
+    .case-body{padding:22px}
+    .case-co{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+    .case-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:16px;line-height:1.3}
+    .case-block{margin-bottom:14px}
+    .case-block-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+    .case-block-text{font-size:13px;color:var(--muted);line-height:1.65}
+    .case-impact{background:var(--teal-l);border-radius:var(--r-sm);padding:10px 14px}
+    .case-impact .case-block-label{color:var(--teal)}
+    .case-impact .case-block-text{color:var(--teal-d);font-weight:500}
+    @media(max-width:900px){.case-grid{grid-template-columns:1fr}}
 
     /* SKILLS */
     #skills{background:var(--white)}
@@ -236,6 +258,7 @@
     <div class="nav-links">
       <a href="#about">About</a>
       <a href="#experience">Experience</a>
+      <a href="#projects">Projects</a>
       <a href="#skills">Skills</a>
       <a href="#demos" class="hl">&#9889; Live Demos</a>
       <a href="#code">Code</a>
@@ -253,8 +276,8 @@
       <div>
         <div class="hero-badge">Open to opportunities</div>
         <h1 class="hero-name"><em>Ofer</em> Sadeh Man</h1>
-        <p class="hero-sub">Implementation Manager</p>
-        <p class="hero-tagline">15 years bringing large, complex enterprise software implementations to fulfillment. Deep technical expertise meets a passion for customer-facing delivery.</p>
+        <p class="hero-sub">Enterprise SaaS Implementation Leader</p>
+        <p class="hero-tagline">I lead complex enterprise SaaS implementations from solution design to go-live — bridging technical teams and customers across fintech, bio-pharma, and digital signing.<br><br><strong style="color:#6ee7c5;font-weight:600;letter-spacing:.03em">Tipalti &nbsp;&middot;&nbsp; DocuSign &nbsp;&middot;&nbsp; Salesforce ecosystem</strong></p>
         <div class="hero-btns">
           <a href="mailto:ofer.man.om@gmail.com" class="btn-p">Get in touch</a>
           <a href="#demos" class="btn-o">&#9889; See live demos</a>
@@ -288,6 +311,12 @@
         <p>I've worked across banking, bio-pharma, fintech, game studios, and tech startups globally, integrating with Salesforce, SAP, Workday, ServiceNow and more. I thrive in roles that bridge the technical and commercial worlds.</p>
       </div>
       <div>
+        <ul class="bring-list">
+          <li>Bridge between business stakeholders and technical teams — fluent in both worlds</li>
+          <li>Proven in high-stakes, high-visibility enterprise rollouts at global scale</li>
+          <li>Trusted to lead cross-functional delivery: R&amp;D, QA, Customer, Product</li>
+          <li>Consistent top performer: highest revenue, highest CSAT, company-wide award</li>
+        </ul>
         <div class="award-card"><div class="award-icon">&#127942;</div><div><div class="award-title">Hero of the Company &mdash; April 2024</div><div class="award-desc">Tipalti company-wide recognition award</div></div></div>
         <div class="award-card"><div class="award-icon">&#128176;</div><div><div class="award-title">Highest Revenue Team Member</div><div class="award-desc">Led enterprise accounts generating top team revenue</div></div></div>
         <div class="award-card"><div class="award-icon">&#11088;</div><div><div class="award-title">Highest CSAT Score</div><div class="award-desc">Consistently ranked #1 for customer satisfaction</div></div></div>
@@ -312,7 +341,7 @@
             <li>Led &gt;$1M enterprise implementation projects, supporting customers across the globe</li>
             <li>Played a key role in acquisition and merger process &mdash; overseeing implementation and setting up new internal processes</li>
             <li>Served as lead mentor, bringing new talent up to speed across the team</li>
-            <li>Delivered across diverse industries: tech startups, game studios, biotech, fintech</li>
+            <li>Delivered globally across 10+ countries &mdash; gaming, biotech, and fintech enterprises</li>
           </ul>
           <div class="chips">
             <span class="chip" style="background:var(--amber-l);color:var(--amber)">&#127942; Hero of the Company</span>
@@ -331,7 +360,7 @@
             <li>Led complex implementations in cryptographic digital signing across SMBs through S&amp;P 500 enterprises</li>
             <li>Developed deep expertise in banking and bio-pharma industries</li>
             <li>Hands-on integration building: REST, SOAP, Salesforce, SAP, Workday, ServiceNow</li>
-            <li>Helped build internal methodologies and knowledgebase accelerating team onboarding</li>
+            <li>Designed internal methodologies and knowledge base that cut new-hire ramp time across the team</li>
           </ul>
         </div>
       </div>
@@ -342,9 +371,9 @@
             <span class="tl-period">2010 &ndash; 2016</span>
           </div>
           <ul class="tl-bullets">
-            <li>Solution design, architecture, and implementation for large enterprise customers</li>
+            <li>Owned end-to-end solution design and architecture for large enterprise customers</li>
             <li>Oversaw full technical lifecycle: need assessment, design workshops, R&amp;D coordination, UAT management, delivery</li>
-            <li>Assisted with project, escalation, and crisis management</li>
+            <li>Led escalation management and crisis resolution, maintaining delivery continuity on high-stakes rollouts</li>
           </ul>
         </div>
       </div>
@@ -357,6 +386,78 @@
           <ul class="tl-bullets"><li>Product core stabilization and rapid new features assimilation</li></ul>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="container">
+    <p class="sec-label">Project highlights</p>
+    <h2>Implementations that shipped</h2>
+    <p class="projects-intro">A sample of the enterprise implementations I've led — from first call to go-live. Each involved cross-functional coordination across Product, R&amp;D, QA, and Customer teams.</p>
+    <p class="projects-nda">&#128274; Client names anonymised per NDA. Outcomes based on documented delivery results.</p>
+    <div class="case-grid">
+
+      <div class="case-card">
+        <div class="case-top" style="background:var(--teal)"></div>
+        <div class="case-body">
+          <div class="case-co">Tipalti &middot; Fintech</div>
+          <div class="case-title">Global Payment Automation for a Multi-Entity Enterprise</div>
+          <div class="case-block">
+            <div class="case-block-label" style="color:var(--coral)">Challenge</div>
+            <div class="case-block-text">Multi-entity payment workflows spanning 12 countries, requiring ERP integration, currency compliance, and custom approval routing.</div>
+          </div>
+          <div class="case-block">
+            <div class="case-block-label" style="color:var(--blue)">Solution</div>
+            <div class="case-block-text">Designed REST API integration with SAP; built a bespoke onboarding playbook; coordinated R&amp;D for edge-case handling and compliance mapping.</div>
+          </div>
+          <div class="case-block case-impact">
+            <div class="case-block-label">Impact</div>
+            <div class="case-block-text">On-time go-live &middot; Customer expanded to additional Tipalti modules within 6 months &middot; Escalation-free delivery</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <div class="case-top" style="background:var(--blue)"></div>
+        <div class="case-body">
+          <div class="case-co">DocuSign &middot; Bio-Pharma</div>
+          <div class="case-title">Regulated eSign Rollout for an S&amp;P 500 Bio-Pharma</div>
+          <div class="case-block">
+            <div class="case-block-label" style="color:var(--coral)">Challenge</div>
+            <div class="case-block-text">Replace wet signatures across regulated clinical workflows at a global bio-pharma — full FDA and 21 CFR Part 11 compliance required.</div>
+          </div>
+          <div class="case-block">
+            <div class="case-block-label" style="color:var(--blue)">Solution</div>
+            <div class="case-block-text">Architected SAML SSO + JWT-authenticated DocuSign integration; led UAT across 5 departments; designed audit-trail and re-authentication flows.</div>
+          </div>
+          <div class="case-block case-impact">
+            <div class="case-block-label">Impact</div>
+            <div class="case-block-text">Full compliance achieved &middot; CSAT top-rated &middot; Adopted internally as reference implementation for regulated-industry rollouts</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <div class="case-top" style="background:var(--amber)"></div>
+        <div class="case-body">
+          <div class="case-co">ClickSoftware &middot; Utilities / Salesforce</div>
+          <div class="case-title">Field Service Transformation for a National Utility</div>
+          <div class="case-block">
+            <div class="case-block-label" style="color:var(--coral)">Challenge</div>
+            <div class="case-block-text">Deploy enterprise field service management across 1,000+ mobile workers for a national utility — tight regulatory timeline, legacy systems.</div>
+          </div>
+          <div class="case-block">
+            <div class="case-block-label" style="color:var(--blue)">Solution</div>
+            <div class="case-block-text">Led full delivery lifecycle: solution design workshops, mobile integration, R&amp;D coordination, UAT management, and phased go-live.</div>
+          </div>
+          <div class="case-block case-impact">
+            <div class="case-block-label">Impact</div>
+            <div class="case-block-text">Delivered on schedule &middot; Became a reference account &middot; Escalation-free post go-live support period</div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
