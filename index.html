@@ -1557,14 +1557,26 @@ function csvParse(text){
   if(!lines.length) return null;
   return{headers:csvParseRow(lines[0]),rows:lines.slice(1).filter(function(l){return l.trim();}).map(csvParseRow)};
 }
+var CSV_MAX_BYTES=2*1024*1024,CSV_MAX_ROWS=5000,CSV_PREVIEW_ROWS=500;
 function csvLoad(input){
   var file=input.files[0];
   if(!file) return;
   var out=document.getElementById('csv-out');
+  if(file.size>CSV_MAX_BYTES){
+    out.className='d-out';
+    out.innerHTML='<span style="color:#ef4444">File too large (max 2 MB). Please upload a smaller CSV.</span>';
+    document.getElementById('csv-dl-btn').disabled=true;_csvCleaned=null;
+    input.value='';return;
+  }
   var reader=new FileReader();
   reader.onload=function(e){
     var parsed=csvParse(e.target.result);
     if(!parsed){out.className='d-out';out.innerHTML='<span style="color:#ef4444">Could not parse CSV.</span>';return;}
+    if(parsed.rows.length>CSV_MAX_ROWS){
+      out.className='d-out';
+      out.innerHTML='<span style="color:#ef4444">Too many rows (max '+CSV_MAX_ROWS+'). Please upload a smaller file.</span>';
+      document.getElementById('csv-dl-btn').disabled=true;_csvCleaned=null;return;
+    }
     var colIdx=-1;
     for(var i=0;i<parsed.headers.length;i++){if(/country/i.test(parsed.headers[i].trim())){colIdx=i;break;}}
     if(colIdx===-1){
@@ -1585,13 +1597,15 @@ function csvLoad(input){
       tableRows.push({orig:orig,name:norm?norm.name:'',a2:norm?norm.a2:'',ok:!!norm});
     });
     _csvCleaned=cleaned;
+    var previewRows=tableRows.slice(0,CSV_PREVIEW_ROWS);
+    var truncated=tableRows.length>CSV_PREVIEW_ROWS;
     var html='<table style="border-collapse:collapse;font-size:11px;width:100%">'
       +'<thead><tr>'
       +'<th style="text-align:left;padding:3px 8px;border-bottom:1px solid var(--border);color:var(--muted)">Original</th>'
       +'<th style="text-align:left;padding:3px 8px;border-bottom:1px solid var(--border);color:var(--muted)">Normalized Name</th>'
       +'<th style="text-align:left;padding:3px 8px;border-bottom:1px solid var(--border);color:var(--muted)">Alpha-2</th>'
       +'</tr></thead><tbody>';
-    tableRows.forEach(function(r){
+    previewRows.forEach(function(r){
       html+='<tr>'
         +'<td style="padding:2px 8px;border-bottom:1px solid var(--border)">'+escHtml(r.orig)+'</td>'
         +'<td style="padding:2px 8px;border-bottom:1px solid var(--border);color:'+(r.ok?'inherit':'#ef4444')+'">'+(r.ok?escHtml(r.name):'<em>not found</em>')+'</td>'
@@ -1599,6 +1613,7 @@ function csvLoad(input){
         +'</tr>';
     });
     html+='</tbody></table>';
+    if(truncated) html+='<div style="font-size:11px;color:#f59e0b;margin-top:4px">&#9432; Preview shows first '+CSV_PREVIEW_ROWS+' of '+tableRows.length+' rows. Download includes all rows.</div>';
     if(notFound>0) html+='<div style="font-size:11px;color:#f59e0b;margin-top:4px">&#9888; '+notFound+' row'+(notFound>1?'s':'')+' could not be normalized — original value kept.</div>';
     out.className='d-out';out.innerHTML=html;
     document.getElementById('csv-dl-btn').disabled=false;
@@ -1811,14 +1826,21 @@ function ttClearRoute(){
   document.getElementById('tt-btn-calc').disabled=true;
 }
 
+var _ttFetchTs=0,_ttFetchCtrl=null,TT_FETCH_COOLDOWN=3000;
 async function ttFetchRoute(a,b){
+  var now=Date.now();
+  if(now-_ttFetchTs<TT_FETCH_COOLDOWN){ttHint('Please wait a moment before requesting another route.');return;}
+  if(_ttFetchCtrl){try{_ttFetchCtrl.abort();}catch(e){}}
+  _ttFetchCtrl=new AbortController();
+  _ttFetchTs=now;
   var url='https://router.project-osrm.org/route/v1/driving/'+a.lng+','+a.lat+';'+b.lng+','+b.lat+'?overview=full&geometries=geojson';
   var pts=null;
   try{
-    var res=await fetch(url);var data=await res.json();
+    var res=await fetch(url,{signal:_ttFetchCtrl.signal});var data=await res.json();
     if(data.code==='Ok'&&data.routes&&data.routes.length)
       pts=data.routes[0].geometry.coordinates.map(function(c){return[c[1],c[0]];});
-  }catch(e){}
+  }catch(e){if(e.name==='AbortError')return;}
+  _ttFetchCtrl=null;
   if(!pts) pts=[[a.lat,a.lng],[b.lat,b.lng]];
   if(ttRouteLineBg) ttMap.removeLayer(ttRouteLineBg);
   if(ttRouteLine) ttMap.removeLayer(ttRouteLine);
