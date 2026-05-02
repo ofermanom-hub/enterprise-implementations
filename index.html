@@ -636,6 +636,10 @@
             <button id="tt-btn-calc" class="d-btn d-btn-sec" style="flex:1;min-width:140px;width:auto" onclick="ttCalculateRoute()" disabled>Calc travel time</button>
             <button class="d-btn d-btn-sec" style="flex:1;min-width:120px;width:auto" onclick="ttResetDB()">Reset database</button>
           </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:8px;cursor:pointer">
+            <input type="checkbox" id="tt-grid-chk" onchange="ttToggleGrid(this.checked)" style="accent-color:var(--teal);width:14px;height:14px">
+            Show route grid (300 lines)
+          </label>
           <div class="d-expiry" id="tt-hint" style="text-align:left;min-height:16px;margin-top:4px"></div>
           <div id="tt-results" style="display:none;margin-top:6px">
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
@@ -644,7 +648,7 @@
               <div><div class="d-label">Current time</div><div class="d-out" id="tt-curr-time" style="min-height:40px"></div></div>
             </div>
           </div>
-          <div class="d-expiry" id="tt-stats" style="margin-top:6px">15 routes &middot; 0 modified</div>
+          <div class="d-expiry" id="tt-stats" style="margin-top:6px">300 routes &middot; 0 modified</div>
           <div style="display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:4px">
             <span>&#9679; <span style="color:#22c55e">green</span> &lt;10 min</span>
             <span>&#9679; <span style="color:#f59e0b">amber</span> 10&ndash;25 min</span>
@@ -1284,44 +1288,25 @@ function doClearJSONF(){
 }
 
 // Travel Time Demo
-var ttOrigData=[
-  {id:1,oLat:40.758,oLng:-73.985,dLat:40.730,dLng:-73.997,time:8.5},
-  {id:2,oLat:40.745,oLng:-73.989,dLat:40.770,dLng:-73.960,time:22.3},
-  {id:3,oLat:40.717,oLng:-73.981,dLat:40.754,dLng:-73.972,time:31.1},
-  {id:4,oLat:40.762,oLng:-73.978,dLat:40.738,dLng:-73.990,time:14.7},
-  {id:5,oLat:40.725,oLng:-73.994,dLat:40.748,dLng:-73.975,time:7.2},
-  {id:6,oLat:40.753,oLng:-73.965,dLat:40.720,dLng:-73.988,time:28.4},
-  {id:7,oLat:40.769,oLng:-73.982,dLat:40.742,dLng:-73.963,time:11.8},
-  {id:8,oLat:40.741,oLng:-74.002,dLat:40.760,dLng:-73.974,time:19.2},
-  {id:9,oLat:40.730,oLng:-73.975,dLat:40.755,dLng:-73.999,time:5.6},
-  {id:10,oLat:40.757,oLng:-73.993,dLat:40.722,dLng:-73.970,time:33.8},
-  {id:11,oLat:40.748,oLng:-73.977,dLat:40.768,dLng:-73.992,time:9.1},
-  {id:12,oLat:40.735,oLng:-73.985,dLat:40.752,dLng:-73.962,time:24.5},
-  {id:13,oLat:40.764,oLng:-73.970,dLat:40.736,dLng:-73.997,time:16.3},
-  {id:14,oLat:40.722,oLng:-73.978,dLat:40.758,dLng:-73.985,time:12.7},
-  {id:15,oLat:40.750,oLng:-73.988,dLat:40.728,dLng:-73.972,time:27.9}
-];
-var ttData=ttOrigData.map(function(r){return Object.assign({},r);});
-var ttMap=null,ttPolylines=[],ttChangedIds=new Set();
-var ttDrawing=false,ttPicking=false,ttDrawHandler=null,ttDrawnLayer=null,ttCurrentRing=null,ttVertexCount=0;
-var ttRoutePoints=[],ttRouteMarkers=[],ttRouteLine=null,ttRouteLineBg=null,ttLastCalc=null;
-var ttStartIcon=null,ttEndIcon=null;
-
-function ttColor(t){return t<10?'#22c55e':t<=25?'#f59e0b':'#ef4444';}
-
+function ttMulberry32(s){
+  return function(){
+    s|=0;s=(s+0x6D2B79F5)|0;
+    var t=Math.imul(s^(s>>>15),1|s);
+    t=(t+Math.imul(t^(t>>>7),61|t))^t;
+    return((t^(t>>>14))>>>0)/4294967296;
+  };
+}
 function ttHaversineKm(lat1,lng1,lat2,lng2){
   var R=6371,toRad=function(d){return d*Math.PI/180;};
   var dLat=toRad(lat2-lat1),dLng=toRad(lng2-lng1);
   var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)*Math.sin(dLng/2);
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
-
 function ttGeoLengthKm(pts){
   var total=0;
   for(var i=1;i<pts.length;i++) total+=ttHaversineKm(pts[i-1][0],pts[i-1][1],pts[i][0],pts[i][1]);
   return total;
 }
-
 function ttPtInPoly(lat,lng,ring){
   var x=lng,y=lat,inside=false;
   for(var i=0,j=ring.length-1;i<ring.length;j=i++){
@@ -1330,17 +1315,43 @@ function ttPtInPoly(lat,lng,ring){
   }
   return inside;
 }
+// Generate 300 routes with identical seed/PRNG as the original React app
+function ttGenRecords(){
+  var rand=ttMulberry32(42);
+  var LAT_MIN=40.68,LAT_MAX=40.82,LNG_MIN=-74.02,LNG_MAX=-73.93,SPEED=25;
+  var rng=function(a,b){return rand()*(b-a)+a;};
+  var out=[];
+  for(var i=0;i<300;i++){
+    var oLat=rng(LAT_MIN,LAT_MAX),oLng=rng(LNG_MIN,LNG_MAX);
+    var dLat=rng(LAT_MIN,LAT_MAX),dLng=rng(LNG_MIN,LNG_MAX);
+    var dist=ttHaversineKm(oLat,oLng,dLat,dLng);
+    out.push({id:i+1,oLat:oLat,oLng:oLng,dLat:dLat,dLng:dLng,
+      distKm:dist,time:dist/SPEED*60,geo:[[oLat,oLng],[dLat,dLng]]});
+  }
+  return out;
+}
+var ttOrigData=ttGenRecords();
+var ttData=ttOrigData.map(function(r){return Object.assign({},r);});
+var ttMap=null,ttPolylines=[],ttChangedIds=new Set(),ttShowGrid=false;
+var ttDrawing=false,ttPicking=false,ttDrawHandler=null,ttDrawnLayer=null,ttCurrentRing=null,ttVertexCount=0;
+var ttRoutePoints=[],ttRouteMarkers=[],ttRouteLine=null,ttRouteLineBg=null;
+var ttRouteStartPt=null,ttRouteDistKm=null;
+var ttStartIcon=null,ttEndIcon=null;
+
+function ttColor(t){return t<10?'#22c55e':t<=25?'#f59e0b':'#ef4444';}
 
 function ttDraw(){
   ttPolylines.forEach(function(p){
     if(Array.isArray(p)){p.forEach(function(l){ttMap.removeLayer(l);});}
-    else{ttMap.removeLayer(p);}
+    else ttMap.removeLayer(p);
   });
   ttPolylines=[];
   ttData.forEach(function(r){
-    var pos=[[r.oLat,r.oLng],[r.dLat,r.dLng]],color=ttColor(r.time);
+    var changed=ttChangedIds.has(r.id);
+    if(!ttShowGrid&&!changed) return;
+    var pos=r.geo,color=ttColor(r.time);
     var tip='Route #'+r.id+' — '+r.time.toFixed(1)+' min';
-    if(ttChangedIds.has(r.id)){
+    if(changed){
       var bg=L.polyline(pos,{color:'#ffffff',weight:7,opacity:0.5});
       var fg=L.polyline(pos,{color:color,weight:3.5,opacity:1}).bindTooltip(tip,{sticky:true});
       bg.addTo(ttMap);fg.addTo(ttMap);ttPolylines.push([bg,fg]);
@@ -1352,13 +1363,30 @@ function ttDraw(){
 }
 
 function ttStats(){
-  document.getElementById('tt-stats').textContent='15 routes · '+ttChangedIds.size+' modified';
+  document.getElementById('tt-stats').textContent='300 routes · '+ttChangedIds.size+' modified';
 }
+function ttHint(msg){var el=document.getElementById('tt-hint');if(el)el.textContent=msg;}
 
-function ttHint(msg){
-  var el=document.getElementById('tt-hint');
-  if(el) el.textContent=msg;
+// Recompute travel time from current ttData — called by Calc button AND after GIS refresh
+function ttRecalcTravelTime(){
+  if(!ttRouteStartPt) return null;
+  var nearest=ttData[0],nearestOrig=ttOrigData[0],minD=Infinity;
+  ttData.forEach(function(r,i){
+    var d=ttHaversineKm(ttRouteStartPt.lat,ttRouteStartPt.lng,r.oLat,r.oLng);
+    if(d<minD){minD=d;nearest=r;nearestOrig=ttOrigData[i];}
+  });
+  return{distKm:ttRouteDistKm,origTime:nearestOrig.time,currTime:nearest.time};
 }
+function ttShowResults(c){
+  if(!c) return;
+  document.getElementById('tt-dist').textContent=c.distKm.toFixed(2)+' km';
+  document.getElementById('tt-orig-time').textContent=c.origTime.toFixed(1)+' min';
+  var el=document.getElementById('tt-curr-time');
+  el.textContent=c.currTime.toFixed(1)+' min';
+  el.style.color=c.currTime>c.origTime?'#ef4444':c.currTime<c.origTime?'#22c55e':'inherit';
+  document.getElementById('tt-results').style.display='block';
+}
+function ttCalculateRoute(){ttShowResults(ttRecalcTravelTime());}
 
 function ttInitMap(){
   if(ttMap) return;
@@ -1374,10 +1402,28 @@ function ttInitMap(){
   });
   ttMap=L.map('tt-map',{scrollWheelZoom:false}).setView([40.750,-73.980],13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19
+    attribution:'© <a href=”https://www.openstreetmap.org/copyright”>OpenStreetMap</a>',maxZoom:19
   }).addTo(ttMap);
   ttDrawnLayer=new L.FeatureGroup();
   ttMap.addLayer(ttDrawnLayer);
+
+  // Load pre-built OSRM geometries and swap straight-line fallbacks
+  fetch('./routeGeometries.json')
+    .then(function(r){return r.json();})
+    .then(function(geos){
+      var geoMap={};
+      geos.forEach(function(g){geoMap[g.id]=g;});
+      ttOrigData=ttOrigData.map(function(r){
+        var g=geoMap[r.id];
+        return g?Object.assign({},r,{distKm:g.distanceKm,time:g.travelTimeMin,geo:g.geometry}):r;
+      });
+      ttData=ttData.map(function(r){
+        var g=geoMap[r.id];
+        return g?Object.assign({},r,{distKm:g.distanceKm,time:g.travelTimeMin,geo:g.geometry}):r;
+      });
+      if(ttChangedIds.size>0||ttShowGrid) ttDraw();
+    }).catch(function(){});
+
   ttMap.on(L.Draw.Event.CREATED,function(e){
     ttDrawnLayer.clearLayers();
     ttDrawnLayer.addLayer(e.layer);
@@ -1387,8 +1433,7 @@ function ttInitMap(){
     ttData=ttData.map(function(r){
       if(!ttPtInPoly(r.oLat,r.oLng,ring)) return r;
       changed.push(r.id);
-      var factor=1+(Math.random()*1.0-0.4);
-      return Object.assign({},r,{time:r.time*factor});
+      return Object.assign({},r,{time:r.time*(1+(Math.random()*1.0-0.4))});
     });
     ttChangedIds=new Set(changed);
     ttDrawing=false;ttVertexCount=0;
@@ -1414,8 +1459,8 @@ function ttInitMap(){
     if(!ttPicking||ttDrawing) return;
     if(ttRoutePoints.length>=2) ttClearRoute();
     ttRoutePoints.push({lat:e.latlng.lat,lng:e.latlng.lng});
-    var icon=ttRoutePoints.length===1?ttStartIcon:ttEndIcon;
-    ttRouteMarkers.push(L.marker([e.latlng.lat,e.latlng.lng],{icon:icon}).addTo(ttMap));
+    ttRouteMarkers.push(L.marker([e.latlng.lat,e.latlng.lng],
+      {icon:ttRoutePoints.length===1?ttStartIcon:ttEndIcon}).addTo(ttMap));
     if(ttRoutePoints.length===2){
       ttHint('Routing via OSRM…');
       ttFetchRoute(ttRoutePoints[0],ttRoutePoints[1]);
@@ -1432,7 +1477,7 @@ function ttClearRoute(){
   ttRouteMarkers=[];
   if(ttRouteLine){ttMap.removeLayer(ttRouteLine);ttRouteLine=null;}
   if(ttRouteLineBg){ttMap.removeLayer(ttRouteLineBg);ttRouteLineBg=null;}
-  ttLastCalc=null;
+  ttRouteStartPt=null;ttRouteDistKm=null;
   document.getElementById('tt-results').style.display='none';
   document.getElementById('tt-btn-calc').disabled=true;
 }
@@ -1441,8 +1486,7 @@ async function ttFetchRoute(a,b){
   var url='https://router.project-osrm.org/route/v1/driving/'+a.lng+','+a.lat+';'+b.lng+','+b.lat+'?overview=full&geometries=geojson';
   var pts=null;
   try{
-    var res=await fetch(url);
-    var data=await res.json();
+    var res=await fetch(url);var data=await res.json();
     if(data.code==='Ok'&&data.routes&&data.routes.length)
       pts=data.routes[0].geometry.coordinates.map(function(c){return[c[1],c[0]];});
   }catch(e){}
@@ -1451,26 +1495,10 @@ async function ttFetchRoute(a,b){
   if(ttRouteLine) ttMap.removeLayer(ttRouteLine);
   ttRouteLineBg=L.polyline(pts,{color:'#ffffff',weight:8,opacity:0.5}).addTo(ttMap);
   ttRouteLine=L.polyline(pts,{color:'#3b82f6',weight:4,opacity:0.95,dashArray:'8 4'}).addTo(ttMap);
-  var distKm=ttGeoLengthKm(pts);
-  var nearest=ttData[0],nearestOrig=ttOrigData[0],minD=Infinity;
-  ttData.forEach(function(r,i){
-    var d=ttHaversineKm(a.lat,a.lng,r.oLat,r.oLng);
-    if(d<minD){minD=d;nearest=r;nearestOrig=ttOrigData[i];}
-  });
-  ttLastCalc={distKm:distKm,origTime:nearestOrig.time,currTime:nearest.time};
+  ttRouteStartPt={lat:a.lat,lng:a.lng};
+  ttRouteDistKm=ttGeoLengthKm(pts);
   document.getElementById('tt-btn-calc').disabled=false;
   ttHint('Route drawn — click “Calc travel time” to see results.');
-}
-
-function ttCalculateRoute(){
-  if(!ttLastCalc) return;
-  var c=ttLastCalc;
-  document.getElementById('tt-dist').textContent=c.distKm.toFixed(2)+' km';
-  document.getElementById('tt-orig-time').textContent=c.origTime.toFixed(1)+' min';
-  var el=document.getElementById('tt-curr-time');
-  el.textContent=c.currTime.toFixed(1)+' min';
-  el.style.color=c.currTime>c.origTime?'#ef4444':c.currTime<c.origTime?'#22c55e':'inherit';
-  document.getElementById('tt-results').style.display='block';
 }
 
 function ttToggleDraw(){
@@ -1479,26 +1507,21 @@ function ttToggleDraw(){
   ttDrawing=!ttDrawing;
   var btn=document.getElementById('tt-btn-draw');
   if(ttDrawing){
-    btn.classList.add('d-btn-active');
-    ttMap.getContainer().style.cursor='crosshair';
+    btn.classList.add('d-btn-active');ttMap.getContainer().style.cursor='crosshair';
     ttDrawHandler=new L.Draw.Polygon(ttMap,{shapeOptions:{color:'#6366f1',weight:2},allowIntersection:false,snapDistance:20});
     ttDrawHandler.enable();
-    var closeBtn=document.getElementById('tt-btn-close');
-    closeBtn.style.display='';closeBtn.disabled=true;
+    var cb=document.getElementById('tt-btn-close');cb.style.display='';cb.disabled=true;
     ttVertexCount=0;
     ttHint('Click map to draw a polygon — click the first point to close it.');
   } else {
-    btn.classList.remove('d-btn-active');
-    ttMap.getContainer().style.cursor='';
+    btn.classList.remove('d-btn-active');ttMap.getContainer().style.cursor='';
     document.getElementById('tt-btn-close').style.display='none';
     if(ttDrawHandler){ttDrawHandler.disable();ttDrawHandler=null;}
     ttHint('');
   }
 }
 
-function ttClosePoly(){
-  if(ttDrawHandler&&ttVertexCount>=3) ttDrawHandler._finishShape();
-}
+function ttClosePoly(){if(ttDrawHandler&&ttVertexCount>=3) ttDrawHandler._finishShape();}
 
 function ttRefreshGIS(){
   if(!ttCurrentRing) return;
@@ -1508,12 +1531,12 @@ function ttRefreshGIS(){
   var selectedIds=new Set(shuffled.slice(0,subsetSize).map(function(r){return r.id;}));
   ttData=ttData.map(function(r,i){
     if(!selectedIds.has(r.id)) return r;
-    var factor=1+(Math.random()*0.6-0.3);
-    return Object.assign({},r,{time:ttOrigData[i].time*factor});
+    return Object.assign({},r,{time:ttOrigData[i].time*(1+(Math.random()*0.6-0.3))});
   });
   ttChangedIds=selectedIds;
   ttDraw();ttStats();
   ttHint('Refreshed '+subsetSize+' route'+(subsetSize!==1?'s':'')+' from GIS cache.');
+  if(ttRouteStartPt) ttShowResults(ttRecalcTravelTime());
 }
 
 function ttTogglePick(){
@@ -1522,30 +1545,32 @@ function ttTogglePick(){
   ttPicking=!ttPicking;
   var btn=document.getElementById('tt-btn-pick');
   if(ttPicking){
-    btn.classList.add('d-btn-active');
-    ttMap.getContainer().style.cursor='crosshair';
+    btn.classList.add('d-btn-active');ttMap.getContainer().style.cursor='crosshair';
     ttHint('Click map to place start point…');
   } else {
-    btn.classList.remove('d-btn-active');
-    ttMap.getContainer().style.cursor='';
-    ttHint('');
+    btn.classList.remove('d-btn-active');ttMap.getContainer().style.cursor='';ttHint('');
   }
+}
+
+function ttToggleGrid(checked){
+  if(!ttMap) ttInitMap();
+  ttShowGrid=checked;ttDraw();
 }
 
 function ttResetDB(){
   ttData=ttOrigData.map(function(r){return Object.assign({},r);});
   ttChangedIds=new Set();ttCurrentRing=null;ttVertexCount=0;
   if(ttDrawHandler){ttDrawHandler.disable();ttDrawHandler=null;}
-  ttDrawing=false;ttPicking=false;
+  ttDrawing=false;ttPicking=false;ttShowGrid=false;
   document.getElementById('tt-btn-draw').classList.remove('d-btn-active');
   document.getElementById('tt-btn-pick').classList.remove('d-btn-active');
   document.getElementById('tt-btn-close').style.display='none';
   document.getElementById('tt-btn-refresh').disabled=true;
+  var chk=document.getElementById('tt-grid-chk');if(chk) chk.checked=false;
   if(ttMap){
     ttMap.getContainer().style.cursor='';
     if(ttDrawnLayer) ttDrawnLayer.clearLayers();
-    ttClearRoute();
-    ttDraw();
+    ttClearRoute();ttDraw();
   }
   ttStats();ttHint('');
 }
