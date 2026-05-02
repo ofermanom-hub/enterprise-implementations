@@ -491,6 +491,43 @@
     <p class="demos-intro">Seven fully working tools running entirely in your browser. No backend, no API keys. Each mirrors real implementation patterns from the repo below. The map demo uses Leaflet.js.</p>
     <div class="demos-grid">
 
+      <!-- TRAVEL TIME DEMO -->
+      <div class="demo-card" style="grid-column:1/-1">
+        <div class="demo-head">
+          <div><div class="demo-title">Provide an update on travel times based on the selected area- Clicksoftware</div><div class="demo-sub">Leaflet &middot; OpenStreetMap &middot; OSRM routing &middot; GIS data simulation</div></div>
+          <span class="live-badge">&#9889; LIVE</span>
+        </div>
+        <div class="demo-body">
+          <div id="tt-map" style="height:320px;border-radius:6px;overflow:hidden;border:1px solid var(--border)"></div>
+          <div class="tt-toolbar">
+            <button id="tt-btn-draw" class="d-btn d-btn-sec" style="flex:1;min-width:120px;width:auto" onclick="ttToggleDraw()">Draw polygon</button>
+            <button id="tt-btn-close" class="d-btn d-btn-sec" style="flex:1;min-width:140px;width:auto;display:none" onclick="ttClosePoly()" disabled>&#11042; Close polygon</button>
+            <button id="tt-btn-refresh" class="d-btn d-btn-sec" style="flex:1;min-width:160px;width:auto" onclick="ttRefreshGIS()" disabled>&#8635; Refresh GIS cache</button>
+            <button id="tt-btn-pick" class="d-btn d-btn-sec" style="flex:1;min-width:120px;width:auto" onclick="ttTogglePick()">Pick route</button>
+            <button id="tt-btn-calc" class="d-btn d-btn-sec" style="flex:1;min-width:140px;width:auto" onclick="ttCalculateRoute()" disabled>Calc travel time</button>
+            <button class="d-btn d-btn-sec" style="flex:1;min-width:120px;width:auto" onclick="ttResetDB()">Reset database</button>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:8px;cursor:pointer">
+            <input type="checkbox" id="tt-grid-chk" onchange="ttToggleGrid(this.checked)" style="accent-color:var(--teal);width:14px;height:14px">
+            Show route grid (300 lines)
+          </label>
+          <div class="d-expiry" id="tt-hint" style="text-align:left;min-height:16px;margin-top:4px"></div>
+          <div id="tt-results" style="display:none;margin-top:6px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+              <div><div class="d-label">Route distance</div><div class="d-out" id="tt-dist" style="min-height:40px"></div></div>
+              <div><div class="d-label">Original time</div><div class="d-out" id="tt-orig-time" style="min-height:40px"></div></div>
+              <div><div class="d-label">Current time</div><div class="d-out" id="tt-curr-time" style="min-height:40px"></div></div>
+            </div>
+          </div>
+          <div class="d-expiry" id="tt-stats" style="margin-top:6px">300 routes &middot; 0 modified</div>
+          <div style="display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:4px">
+            <span>&#9679; <span style="color:#22c55e">green</span> &lt;10 min</span>
+            <span>&#9679; <span style="color:#f59e0b">amber</span> 10&ndash;25 min</span>
+            <span>&#9679; <span style="color:#ef4444">red</span> &gt;25 min</span>
+          </div>
+        </div>
+      </div>
+
       <!-- JWT DEMO -->
       <div class="demo-card">
         <div class="demo-head">
@@ -665,42 +702,6 @@
         </div>
       </div>
 
-      <!-- TRAVEL TIME DEMO -->
-      <div class="demo-card" style="grid-column:1/-1">
-        <div class="demo-head">
-          <div><div class="demo-title">Provide an update on travel times based on the selected area- Clicksoftware</div><div class="demo-sub">Leaflet &middot; OpenStreetMap &middot; OSRM routing &middot; GIS data simulation</div></div>
-          <span class="live-badge">&#9889; LIVE</span>
-        </div>
-        <div class="demo-body">
-          <div id="tt-map" style="height:320px;border-radius:6px;overflow:hidden;border:1px solid var(--border)"></div>
-          <div class="tt-toolbar">
-            <button id="tt-btn-draw" class="d-btn d-btn-sec" style="flex:1;min-width:120px;width:auto" onclick="ttToggleDraw()">Draw polygon</button>
-            <button id="tt-btn-close" class="d-btn d-btn-sec" style="flex:1;min-width:140px;width:auto;display:none" onclick="ttClosePoly()" disabled>&#11042; Close polygon</button>
-            <button id="tt-btn-refresh" class="d-btn d-btn-sec" style="flex:1;min-width:160px;width:auto" onclick="ttRefreshGIS()" disabled>&#8635; Refresh GIS cache</button>
-            <button id="tt-btn-pick" class="d-btn d-btn-sec" style="flex:1;min-width:120px;width:auto" onclick="ttTogglePick()">Pick route</button>
-            <button id="tt-btn-calc" class="d-btn d-btn-sec" style="flex:1;min-width:140px;width:auto" onclick="ttCalculateRoute()" disabled>Calc travel time</button>
-            <button class="d-btn d-btn-sec" style="flex:1;min-width:120px;width:auto" onclick="ttResetDB()">Reset database</button>
-          </div>
-          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:8px;cursor:pointer">
-            <input type="checkbox" id="tt-grid-chk" onchange="ttToggleGrid(this.checked)" style="accent-color:var(--teal);width:14px;height:14px">
-            Show route grid (300 lines)
-          </label>
-          <div class="d-expiry" id="tt-hint" style="text-align:left;min-height:16px;margin-top:4px"></div>
-          <div id="tt-results" style="display:none;margin-top:6px">
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-              <div><div class="d-label">Route distance</div><div class="d-out" id="tt-dist" style="min-height:40px"></div></div>
-              <div><div class="d-label">Original time</div><div class="d-out" id="tt-orig-time" style="min-height:40px"></div></div>
-              <div><div class="d-label">Current time</div><div class="d-out" id="tt-curr-time" style="min-height:40px"></div></div>
-            </div>
-          </div>
-          <div class="d-expiry" id="tt-stats" style="margin-top:6px">300 routes &middot; 0 modified</div>
-          <div style="display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:4px">
-            <span>&#9679; <span style="color:#22c55e">green</span> &lt;10 min</span>
-            <span>&#9679; <span style="color:#f59e0b">amber</span> 10&ndash;25 min</span>
-            <span>&#9679; <span style="color:#ef4444">red</span> &gt;25 min</span>
-          </div>
-        </div>
-      </div>
 
     </div>
   </div>
