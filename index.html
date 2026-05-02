@@ -1526,7 +1526,8 @@ function ttClosePoly(){if(ttDrawHandler&&ttVertexCount>=3) ttDrawHandler._finish
 function ttRefreshGIS(){
   if(!ttCurrentRing) return;
   var inside=ttData.filter(function(r){return ttPtInPoly(r.oLat,r.oLng,ttCurrentRing);});
-  var subsetSize=Math.max(3,Math.min(20,Math.floor(inside.length*0.3)));
+  var pct=0.15+Math.random()*0.45;
+  var subsetSize=Math.max(1,Math.min(inside.length,Math.round(inside.length*pct)));
   var shuffled=inside.slice().sort(function(){return Math.random()-0.5;});
   var selectedIds=new Set(shuffled.slice(0,subsetSize).map(function(r){return r.id;}));
   ttData=ttData.map(function(r,i){
