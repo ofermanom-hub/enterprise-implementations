@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{scroll-behavior:smooth}
@@ -246,6 +247,8 @@
     @media(max-width:600px){.persona-grid{grid-template-columns:1fr 1fr}.ai-embed-frame{height:500px}}
 
     #tt-map .leaflet-pane{z-index:1}
+    .tt-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .d-btn-active{background:#4f46e5!important;border-color:#4f46e5!important}
     footer{background:var(--navy);border-top:1px solid rgba(255,255,255,.06);padding:24px 0;text-align:center}
     footer p{font-size:12px;color:rgba(255,255,255,.3)}
     footer a{color:rgba(255,255,255,.5)}
@@ -620,16 +623,26 @@
       <!-- TRAVEL TIME DEMO -->
       <div class="demo-card" style="grid-column:1/-1">
         <div class="demo-head">
-          <div><div class="demo-title">Travel Time Simulator</div><div class="demo-sub">Leaflet &middot; OpenStreetMap &middot; GIS data simulation</div></div>
+          <div><div class="demo-title">Travel Time Simulator</div><div class="demo-sub">Leaflet &middot; OpenStreetMap &middot; OSRM routing &middot; GIS data simulation</div></div>
           <span class="live-badge">&#9889; LIVE</span>
         </div>
         <div class="demo-body">
-          <div id="tt-map" style="height:300px;border-radius:6px;overflow:hidden;border:1px solid var(--border)"></div>
-          <div class="d-row" style="margin-top:8px">
-            <button class="d-btn" onclick="ttSimulate()">&#8635; Simulate GIS Update</button>
-            <button class="d-btn d-btn-sec" onclick="ttReset()">Reset</button>
+          <div id="tt-map" style="height:320px;border-radius:6px;overflow:hidden;border:1px solid var(--border)"></div>
+          <div class="tt-toolbar">
+            <button id="tt-btn-draw" class="d-btn d-btn-sec" style="flex:1;min-width:120px;width:auto" onclick="ttToggleDraw()">Draw polygon</button>
+            <button id="tt-btn-pick" class="d-btn d-btn-sec" style="flex:1;min-width:120px;width:auto" onclick="ttTogglePick()">Pick route</button>
+            <button id="tt-btn-calc" class="d-btn d-btn-sec" style="flex:1;min-width:140px;width:auto" onclick="ttCalculateRoute()" disabled>Calc travel time</button>
+            <button class="d-btn d-btn-sec" style="flex:1;min-width:120px;width:auto" onclick="ttResetDB()">Reset database</button>
           </div>
-          <div class="d-expiry" id="tt-stats">15 routes &middot; 0 modified</div>
+          <div class="d-expiry" id="tt-hint" style="text-align:left;min-height:16px;margin-top:4px"></div>
+          <div id="tt-results" style="display:none;margin-top:6px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+              <div><div class="d-label">Route distance</div><div class="d-out" id="tt-dist" style="min-height:40px"></div></div>
+              <div><div class="d-label">Original time</div><div class="d-out" id="tt-orig-time" style="min-height:40px"></div></div>
+              <div><div class="d-label">Current time</div><div class="d-out" id="tt-curr-time" style="min-height:40px"></div></div>
+            </div>
+          </div>
+          <div class="d-expiry" id="tt-stats" style="margin-top:6px">15 routes &middot; 0 modified</div>
           <div style="display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:4px">
             <span>&#9679; <span style="color:#22c55e">green</span> &lt;10 min</span>
             <span>&#9679; <span style="color:#f59e0b">amber</span> 10&ndash;25 min</span>
@@ -973,6 +986,7 @@ Summary <span class="kw">AS</span> (
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
 <script>
 window.addEventListener('scroll',function(){
   document.getElementById('main-nav').classList.toggle('scrolled',window.scrollY>10);
@@ -1286,51 +1300,225 @@ var ttOrigData=[
   {id:15,oLat:40.750,oLng:-73.988,dLat:40.728,dLng:-73.972,time:27.9}
 ];
 var ttData=ttOrigData.map(function(r){return Object.assign({},r);});
-var ttMap=null,ttPolylines=[];
+var ttMap=null,ttPolylines=[],ttChangedIds=new Set();
+var ttDrawing=false,ttPicking=false,ttDrawHandler=null,ttDrawnLayer=null;
+var ttRoutePoints=[],ttRouteMarkers=[],ttRouteLine=null,ttRouteLineBg=null,ttLastCalc=null;
+var ttStartIcon=null,ttEndIcon=null;
+
 function ttColor(t){return t<10?'#22c55e':t<=25?'#f59e0b':'#ef4444';}
+
+function ttHaversineKm(lat1,lng1,lat2,lng2){
+  var R=6371,toRad=function(d){return d*Math.PI/180;};
+  var dLat=toRad(lat2-lat1),dLng=toRad(lng2-lng1);
+  var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function ttGeoLengthKm(pts){
+  var total=0;
+  for(var i=1;i<pts.length;i++) total+=ttHaversineKm(pts[i-1][0],pts[i-1][1],pts[i][0],pts[i][1]);
+  return total;
+}
+
+function ttPtInPoly(lat,lng,ring){
+  var x=lng,y=lat,inside=false;
+  for(var i=0,j=ring.length-1;i<ring.length;j=i++){
+    var xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1];
+    if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi)) inside=!inside;
+  }
+  return inside;
+}
+
 function ttDraw(){
-  ttPolylines.forEach(function(p){ttMap.removeLayer(p);});
+  ttPolylines.forEach(function(p){
+    if(Array.isArray(p)){p.forEach(function(l){ttMap.removeLayer(l);});}
+    else{ttMap.removeLayer(p);}
+  });
   ttPolylines=[];
   ttData.forEach(function(r){
-    var p=L.polyline([[r.oLat,r.oLng],[r.dLat,r.dLng]],{color:ttColor(r.time),weight:3.5,opacity:0.9})
-      .bindTooltip('Route #'+r.id+' &mdash; '+r.time.toFixed(1)+' min',{sticky:true});
-    p.addTo(ttMap);ttPolylines.push(p);
+    var pos=[[r.oLat,r.oLng],[r.dLat,r.dLng]],color=ttColor(r.time);
+    var tip='Route #'+r.id+' — '+r.time.toFixed(1)+' min';
+    if(ttChangedIds.has(r.id)){
+      var bg=L.polyline(pos,{color:'#ffffff',weight:7,opacity:0.5});
+      var fg=L.polyline(pos,{color:color,weight:3.5,opacity:1}).bindTooltip(tip,{sticky:true});
+      bg.addTo(ttMap);fg.addTo(ttMap);ttPolylines.push([bg,fg]);
+    } else {
+      var p=L.polyline(pos,{color:color,weight:1.5,opacity:0.6}).bindTooltip(tip,{sticky:true});
+      p.addTo(ttMap);ttPolylines.push(p);
+    }
   });
 }
+
 function ttStats(){
-  var mod=ttData.filter(function(r,i){return Math.abs(r.time-ttOrigData[i].time)>0.01;}).length;
-  document.getElementById('tt-stats').textContent='15 routes · '+mod+' modified';
+  document.getElementById('tt-stats').textContent='15 routes · '+ttChangedIds.size+' modified';
 }
+
+function ttHint(msg){
+  var el=document.getElementById('tt-hint');
+  if(el) el.textContent=msg;
+}
+
 function ttInitMap(){
-  if(ttMap)return;
-  ttMap=L.map('tt-map',{zoomControl:true,scrollWheelZoom:false}).setView([40.750,-73.980],13);
+  if(ttMap) return;
+  ttStartIcon=L.icon({
+    iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+    shadowUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    iconSize:[25,41],iconAnchor:[12,41]
+  });
+  ttEndIcon=L.icon({
+    iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+    shadowUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    iconSize:[25,41],iconAnchor:[12,41]
+  });
+  ttMap=L.map('tt-map',{scrollWheelZoom:false}).setView([40.750,-73.980],13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19
+    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19
   }).addTo(ttMap);
-  ttDraw();ttStats();
-}
-function ttSimulate(){
-  if(!ttMap)ttInitMap();
-  var idx=[];
-  while(idx.length<5){var i=Math.floor(Math.random()*15);if(idx.indexOf(i)<0)idx.push(i);}
-  idx.forEach(function(i){
-    var f=0.5+Math.random()*1.3;
-    ttData[i]=Object.assign({},ttData[i],{time:ttOrigData[i].time*f});
+  ttDrawnLayer=new L.FeatureGroup();
+  ttMap.addLayer(ttDrawnLayer);
+  ttMap.on(L.Draw.Event.CREATED,function(e){
+    ttDrawnLayer.clearLayers();
+    ttDrawnLayer.addLayer(e.layer);
+    var ring=e.layer.toGeoJSON().geometry.coordinates[0];
+    var changed=[];
+    ttData=ttData.map(function(r){
+      if(!ttPtInPoly(r.oLat,r.oLng,ring)) return r;
+      changed.push(r.id);
+      var factor=1+(Math.random()*1.0-0.4);
+      return Object.assign({},r,{time:r.time*factor});
+    });
+    ttChangedIds=new Set(changed);
+    ttDrawing=false;
+    document.getElementById('tt-btn-draw').classList.remove('d-btn-active');
+    ttMap.getContainer().style.cursor='';
+    ttDraw();ttStats();
+    ttHint(changed.length+' route'+(changed.length!==1?'s':'')+' updated inside polygon.');
+  });
+  ttMap.on('draw:drawstop',function(){
+    ttDrawing=false;
+    document.getElementById('tt-btn-draw').classList.remove('d-btn-active');
+    ttMap.getContainer().style.cursor='';
+  });
+  ttMap.on('click',function(e){
+    if(!ttPicking||ttDrawing) return;
+    if(ttRoutePoints.length>=2) ttClearRoute();
+    ttRoutePoints.push({lat:e.latlng.lat,lng:e.latlng.lng});
+    var icon=ttRoutePoints.length===1?ttStartIcon:ttEndIcon;
+    ttRouteMarkers.push(L.marker([e.latlng.lat,e.latlng.lng],{icon:icon}).addTo(ttMap));
+    if(ttRoutePoints.length===2){
+      ttHint('Routing via OSRM…');
+      ttFetchRoute(ttRoutePoints[0],ttRoutePoints[1]);
+    } else {
+      ttHint('Start placed — click again to place end point.');
+    }
   });
   ttDraw();ttStats();
 }
-function ttReset(){
-  ttData=ttOrigData.map(function(r){return Object.assign({},r);});
-  if(ttMap){ttDraw();}
-  document.getElementById('tt-stats').textContent='15 routes · 0 modified';
+
+function ttClearRoute(){
+  ttRoutePoints=[];
+  ttRouteMarkers.forEach(function(m){ttMap.removeLayer(m);});
+  ttRouteMarkers=[];
+  if(ttRouteLine){ttMap.removeLayer(ttRouteLine);ttRouteLine=null;}
+  if(ttRouteLineBg){ttMap.removeLayer(ttRouteLineBg);ttRouteLineBg=null;}
+  ttLastCalc=null;
+  document.getElementById('tt-results').style.display='none';
+  document.getElementById('tt-btn-calc').disabled=true;
 }
+
+async function ttFetchRoute(a,b){
+  var url='https://router.project-osrm.org/route/v1/driving/'+a.lng+','+a.lat+';'+b.lng+','+b.lat+'?overview=full&geometries=geojson';
+  var pts=null;
+  try{
+    var res=await fetch(url);
+    var data=await res.json();
+    if(data.code==='Ok'&&data.routes&&data.routes.length)
+      pts=data.routes[0].geometry.coordinates.map(function(c){return[c[1],c[0]];});
+  }catch(e){}
+  if(!pts) pts=[[a.lat,a.lng],[b.lat,b.lng]];
+  if(ttRouteLineBg) ttMap.removeLayer(ttRouteLineBg);
+  if(ttRouteLine) ttMap.removeLayer(ttRouteLine);
+  ttRouteLineBg=L.polyline(pts,{color:'#ffffff',weight:8,opacity:0.5}).addTo(ttMap);
+  ttRouteLine=L.polyline(pts,{color:'#3b82f6',weight:4,opacity:0.95,dashArray:'8 4'}).addTo(ttMap);
+  var distKm=ttGeoLengthKm(pts);
+  var nearest=ttData[0],nearestOrig=ttOrigData[0],minD=Infinity;
+  ttData.forEach(function(r,i){
+    var d=ttHaversineKm(a.lat,a.lng,r.oLat,r.oLng);
+    if(d<minD){minD=d;nearest=r;nearestOrig=ttOrigData[i];}
+  });
+  ttLastCalc={distKm:distKm,origTime:nearestOrig.time,currTime:nearest.time};
+  document.getElementById('tt-btn-calc').disabled=false;
+  ttHint('Route drawn — click “Calc travel time” to see results.');
+}
+
+function ttCalculateRoute(){
+  if(!ttLastCalc) return;
+  var c=ttLastCalc;
+  document.getElementById('tt-dist').textContent=c.distKm.toFixed(2)+' km';
+  document.getElementById('tt-orig-time').textContent=c.origTime.toFixed(1)+' min';
+  var el=document.getElementById('tt-curr-time');
+  el.textContent=c.currTime.toFixed(1)+' min';
+  el.style.color=c.currTime>c.origTime?'#ef4444':c.currTime<c.origTime?'#22c55e':'inherit';
+  document.getElementById('tt-results').style.display='block';
+}
+
+function ttToggleDraw(){
+  if(!ttMap) ttInitMap();
+  if(ttPicking){ttPicking=false;document.getElementById('tt-btn-pick').classList.remove('d-btn-active');ttMap.getContainer().style.cursor='';}
+  ttDrawing=!ttDrawing;
+  var btn=document.getElementById('tt-btn-draw');
+  if(ttDrawing){
+    btn.classList.add('d-btn-active');
+    ttMap.getContainer().style.cursor='crosshair';
+    ttDrawHandler=new L.Draw.Polygon(ttMap,{shapeOptions:{color:'#6366f1',weight:2},allowIntersection:false,snapDistance:20});
+    ttDrawHandler.enable();
+    ttHint('Click map to draw a polygon — click the first point to close it.');
+  } else {
+    btn.classList.remove('d-btn-active');
+    ttMap.getContainer().style.cursor='';
+    if(ttDrawHandler){ttDrawHandler.disable();ttDrawHandler=null;}
+    ttHint('');
+  }
+}
+
+function ttTogglePick(){
+  if(!ttMap) ttInitMap();
+  if(ttDrawing) ttToggleDraw();
+  ttPicking=!ttPicking;
+  var btn=document.getElementById('tt-btn-pick');
+  if(ttPicking){
+    btn.classList.add('d-btn-active');
+    ttMap.getContainer().style.cursor='crosshair';
+    ttHint('Click map to place start point…');
+  } else {
+    btn.classList.remove('d-btn-active');
+    ttMap.getContainer().style.cursor='';
+    ttHint('');
+  }
+}
+
+function ttResetDB(){
+  ttData=ttOrigData.map(function(r){return Object.assign({},r);});
+  ttChangedIds=new Set();
+  if(ttDrawHandler){ttDrawHandler.disable();ttDrawHandler=null;}
+  ttDrawing=false;ttPicking=false;
+  document.getElementById('tt-btn-draw').classList.remove('d-btn-active');
+  document.getElementById('tt-btn-pick').classList.remove('d-btn-active');
+  if(ttMap){
+    ttMap.getContainer().style.cursor='';
+    if(ttDrawnLayer) ttDrawnLayer.clearLayers();
+    ttClearRoute();
+    ttDraw();
+  }
+  ttStats();ttHint('');
+}
+
 (function(){
   var el=document.getElementById('tt-map');
-  if(!el)return;
-  var obs=new IntersectionObserver(function(entries){
-    if(entries[0].isIntersecting&&!ttMap)ttInitMap();
-  },{threshold:0.1});
-  obs.observe(el);
+  if(!el) return;
+  new IntersectionObserver(function(entries){
+    if(entries[0].isIntersecting&&!ttMap) ttInitMap();
+  },{threshold:0.1}).observe(el);
 }());
 </script>
 </body>
