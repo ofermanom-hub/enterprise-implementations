@@ -623,13 +623,15 @@
       <!-- TRAVEL TIME DEMO -->
       <div class="demo-card" style="grid-column:1/-1">
         <div class="demo-head">
-          <div><div class="demo-title">Travel Time Simulator</div><div class="demo-sub">Leaflet &middot; OpenStreetMap &middot; OSRM routing &middot; GIS data simulation</div></div>
+          <div><div class="demo-title">Travel time update per area selection</div><div class="demo-sub">Leaflet &middot; OpenStreetMap &middot; OSRM routing &middot; GIS data simulation</div></div>
           <span class="live-badge">&#9889; LIVE</span>
         </div>
         <div class="demo-body">
           <div id="tt-map" style="height:320px;border-radius:6px;overflow:hidden;border:1px solid var(--border)"></div>
           <div class="tt-toolbar">
             <button id="tt-btn-draw" class="d-btn d-btn-sec" style="flex:1;min-width:120px;width:auto" onclick="ttToggleDraw()">Draw polygon</button>
+            <button id="tt-btn-close" class="d-btn d-btn-sec" style="flex:1;min-width:140px;width:auto;display:none" onclick="ttClosePoly()" disabled>&#11042; Close polygon</button>
+            <button id="tt-btn-refresh" class="d-btn d-btn-sec" style="flex:1;min-width:160px;width:auto" onclick="ttRefreshGIS()" disabled>&#8635; Refresh GIS cache</button>
             <button id="tt-btn-pick" class="d-btn d-btn-sec" style="flex:1;min-width:120px;width:auto" onclick="ttTogglePick()">Pick route</button>
             <button id="tt-btn-calc" class="d-btn d-btn-sec" style="flex:1;min-width:140px;width:auto" onclick="ttCalculateRoute()" disabled>Calc travel time</button>
             <button class="d-btn d-btn-sec" style="flex:1;min-width:120px;width:auto" onclick="ttResetDB()">Reset database</button>
@@ -1301,7 +1303,7 @@ var ttOrigData=[
 ];
 var ttData=ttOrigData.map(function(r){return Object.assign({},r);});
 var ttMap=null,ttPolylines=[],ttChangedIds=new Set();
-var ttDrawing=false,ttPicking=false,ttDrawHandler=null,ttDrawnLayer=null;
+var ttDrawing=false,ttPicking=false,ttDrawHandler=null,ttDrawnLayer=null,ttCurrentRing=null,ttVertexCount=0;
 var ttRoutePoints=[],ttRouteMarkers=[],ttRouteLine=null,ttRouteLineBg=null,ttLastCalc=null;
 var ttStartIcon=null,ttEndIcon=null;
 
@@ -1380,6 +1382,7 @@ function ttInitMap(){
     ttDrawnLayer.clearLayers();
     ttDrawnLayer.addLayer(e.layer);
     var ring=e.layer.toGeoJSON().geometry.coordinates[0];
+    ttCurrentRing=ring;
     var changed=[];
     ttData=ttData.map(function(r){
       if(!ttPtInPoly(r.oLat,r.oLng,ring)) return r;
@@ -1388,15 +1391,23 @@ function ttInitMap(){
       return Object.assign({},r,{time:r.time*factor});
     });
     ttChangedIds=new Set(changed);
-    ttDrawing=false;
+    ttDrawing=false;ttVertexCount=0;
     document.getElementById('tt-btn-draw').classList.remove('d-btn-active');
+    document.getElementById('tt-btn-close').style.display='none';
+    document.getElementById('tt-btn-refresh').disabled=false;
     ttMap.getContainer().style.cursor='';
     ttDraw();ttStats();
     ttHint(changed.length+' route'+(changed.length!==1?'s':'')+' updated inside polygon.');
   });
+  ttMap.on('draw:drawvertex',function(){
+    ttVertexCount++;
+    var btn=document.getElementById('tt-btn-close');
+    if(btn) btn.disabled=(ttVertexCount<3);
+  });
   ttMap.on('draw:drawstop',function(){
-    ttDrawing=false;
+    ttDrawing=false;ttVertexCount=0;
     document.getElementById('tt-btn-draw').classList.remove('d-btn-active');
+    document.getElementById('tt-btn-close').style.display='none';
     ttMap.getContainer().style.cursor='';
   });
   ttMap.on('click',function(e){
@@ -1472,13 +1483,37 @@ function ttToggleDraw(){
     ttMap.getContainer().style.cursor='crosshair';
     ttDrawHandler=new L.Draw.Polygon(ttMap,{shapeOptions:{color:'#6366f1',weight:2},allowIntersection:false,snapDistance:20});
     ttDrawHandler.enable();
+    var closeBtn=document.getElementById('tt-btn-close');
+    closeBtn.style.display='';closeBtn.disabled=true;
+    ttVertexCount=0;
     ttHint('Click map to draw a polygon — click the first point to close it.');
   } else {
     btn.classList.remove('d-btn-active');
     ttMap.getContainer().style.cursor='';
+    document.getElementById('tt-btn-close').style.display='none';
     if(ttDrawHandler){ttDrawHandler.disable();ttDrawHandler=null;}
     ttHint('');
   }
+}
+
+function ttClosePoly(){
+  if(ttDrawHandler&&ttVertexCount>=3) ttDrawHandler._finishShape();
+}
+
+function ttRefreshGIS(){
+  if(!ttCurrentRing) return;
+  var inside=ttData.filter(function(r){return ttPtInPoly(r.oLat,r.oLng,ttCurrentRing);});
+  var subsetSize=Math.max(3,Math.min(20,Math.floor(inside.length*0.3)));
+  var shuffled=inside.slice().sort(function(){return Math.random()-0.5;});
+  var selectedIds=new Set(shuffled.slice(0,subsetSize).map(function(r){return r.id;}));
+  ttData=ttData.map(function(r,i){
+    if(!selectedIds.has(r.id)) return r;
+    var factor=1+(Math.random()*0.6-0.3);
+    return Object.assign({},r,{time:ttOrigData[i].time*factor});
+  });
+  ttChangedIds=selectedIds;
+  ttDraw();ttStats();
+  ttHint('Refreshed '+subsetSize+' route'+(subsetSize!==1?'s':'')+' from GIS cache.');
 }
 
 function ttTogglePick(){
@@ -1499,11 +1534,13 @@ function ttTogglePick(){
 
 function ttResetDB(){
   ttData=ttOrigData.map(function(r){return Object.assign({},r);});
-  ttChangedIds=new Set();
+  ttChangedIds=new Set();ttCurrentRing=null;ttVertexCount=0;
   if(ttDrawHandler){ttDrawHandler.disable();ttDrawHandler=null;}
   ttDrawing=false;ttPicking=false;
   document.getElementById('tt-btn-draw').classList.remove('d-btn-active');
   document.getElementById('tt-btn-pick').classList.remove('d-btn-active');
+  document.getElementById('tt-btn-close').style.display='none';
+  document.getElementById('tt-btn-refresh').disabled=true;
   if(ttMap){
     ttMap.getContainer().style.cursor='';
     if(ttDrawnLayer) ttDrawnLayer.clearLayers();
