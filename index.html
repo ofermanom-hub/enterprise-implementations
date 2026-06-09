@@ -170,6 +170,17 @@
     .json-body .jk{color:#85c1e9}.json-body .jv{color:#82e0aa}.json-body .jn{color:#f0b27a}
     .d-expiry{font-size:11px;font-family:var(--mono);color:rgba(255,255,255,.3);text-align:right}
     .d-expiry.ok{color:#6ee7c5}.d-expiry.bad{color:#f1948a}
+    /* Israeli Interior Ministry office finder */
+    .il-layout{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}
+    .il-list{height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-left:4px}
+    .il-map{height:340px;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.1)}
+    .il-item{background:var(--navy-l);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 12px;cursor:pointer;transition:border-color .15s,background .15s}
+    .il-item:hover,.il-item.active{border-color:var(--teal);background:rgba(15,110,86,.18)}
+    .il-name{font-size:13px;font-weight:600;color:#fff}
+    .il-addr{font-size:11px;color:rgba(255,255,255,.45);margin-top:2px;line-height:1.5}
+    .il-dist{display:inline-block;margin-top:6px;font-size:10px;font-weight:600;font-family:var(--mono);color:#6ee7c5;background:rgba(110,231,197,.12);border:1px solid rgba(110,231,197,.25);border-radius:20px;padding:2px 9px}
+    .il-empty{font-size:12px;color:rgba(255,255,255,.3);font-style:italic;text-align:center;padding:24px 0}
+    @media(max-width:680px){.il-layout{grid-template-columns:1fr}.il-list{height:auto;max-height:300px}}
     .d-fields{display:flex;flex-direction:column;gap:6px}
     .d-field{display:flex;gap:8px;align-items:flex-start;font-size:11px}
     .d-fk{font-family:var(--mono);color:#85c1e9;width:85px;flex-shrink:0}
@@ -492,7 +503,7 @@
   <div class="container">
     <p class="sec-label">Interactive coding demos</p>
     <h2>See the code work &mdash; live</h2>
-    <p class="demos-intro">Seven fully working tools running entirely in your browser. No backend, no API keys. Each mirrors real implementation patterns from the repo below. The map demo uses Leaflet.js.</p>
+    <p class="demos-intro">Eleven fully working tools running entirely in your browser. No backend, no API keys. Each mirrors real implementation patterns from the repo below. The map demos use Leaflet.js &mdash; including an Arabic office finder that locates your nearest Interior Ministry bureau.</p>
     <div class="demos-grid">
 
       <!-- TRAVEL TIME DEMO -->
@@ -529,6 +540,29 @@
             <span>&#9679; <span style="color:#f59e0b">amber</span> 10&ndash;25 min</span>
             <span>&#9679; <span style="color:#ef4444">red</span> &gt;25 min</span>
           </div>
+        </div>
+      </div>
+
+      <!-- ISRAELI INTERIOR MINISTRY OFFICE FINDER (Arabic / RTL) -->
+      <div class="demo-card" style="grid-column:1/-1" dir="rtl">
+        <div class="demo-head">
+          <div><div class="demo-title">دليل مكاتب وزارة الداخلية الإسرائيلية</div><div class="demo-sub">رشطة السكان والهجرة &middot; Leaflet &middot; تحديد الموقع الجغرافي &middot; مسافة هافرسين</div></div>
+          <span class="live-badge">&#9889; مباشر</span>
+        </div>
+        <div class="demo-body">
+          <div class="d-row" style="grid-template-columns:1fr auto;align-items:end;gap:10px">
+            <div>
+              <div class="d-label">ابحث حسب المدينة</div>
+              <input class="d-inp" id="il-search" oninput="ilFilter()" placeholder="القدس، حيفا، تل أبيب&#8230;" autocomplete="off" dir="rtl">
+            </div>
+            <button class="d-btn" style="width:auto;white-space:nowrap" onclick="ilLocate(this)">&#128205; أقرب مكتب لي</button>
+          </div>
+          <div class="d-expiry" id="il-hint" style="text-align:right;min-height:16px">&#127470;&#127473; جميع المكاتب &mdash; اختر مدينة أو حدّد موقعك لترتيبها حسب الأقرب.</div>
+          <div class="il-layout">
+            <div id="il-list" class="il-list" dir="rtl"></div>
+            <div id="il-map" class="il-map"></div>
+          </div>
+          <div class="d-expiry" style="text-align:right;color:rgba(255,255,255,.25)">العناوين والإحداثيات تقريبية لأغراض العرض التوضيحي فقط.</div>
         </div>
       </div>
 
@@ -1932,6 +1966,169 @@ function ttResetDB(){
   if(!el) return;
   new IntersectionObserver(function(entries){
     if(entries[0].isIntersecting&&!ttMap) ttInitMap();
+  },{threshold:0.1}).observe(el);
+}());
+
+// ============================================================
+// Israeli Interior Ministry (Population & Immigration Authority)
+// office finder — Arabic / RTL. List addresses + filter by city
+// + locate nearest bureau via Geolocation + Haversine distance.
+// ============================================================
+var ilOffices=[
+  {ar:'القدس',en:'Jerusalem',addr:'شارع شلوم تسيون هَمَلكا 1، القدس',lat:31.7806,lng:35.2206},
+  {ar:'تل أبيب',en:'Tel Aviv',addr:'شارع سالامِه 53، تل أبيب يافا',lat:32.0631,lng:34.7708},
+  {ar:'حيفا',en:'Haifa',addr:'شارع بال يام 15أ، حيفا',lat:32.8156,lng:34.9989},
+  {ar:'بئر السبع',en:"Be'er Sheva",addr:'شارع هَتِكفا 5، بئر السبع',lat:31.2518,lng:34.7913},
+  {ar:'ريشون لتسيون',en:'Rishon LeZion',addr:'شارع إسرائيل غاليلي 3، ريشون لتسيون',lat:31.9730,lng:34.7925},
+  {ar:'بيتح تكفا',en:'Petah Tikva',addr:'شارع هَحِستَدروت 3، بيتح تكفا',lat:32.0840,lng:34.8878},
+  {ar:'نتانيا',en:'Netanya',addr:'شارع بيرتس بيرنشتاين 3، نتانيا',lat:32.3215,lng:34.8532},
+  {ar:'أشدود',en:'Ashdod',addr:'شارع هَبَناي 1، أشدود',lat:31.7920,lng:34.6497},
+  {ar:'عسقلان',en:'Ashkelon',addr:'شارع تسهال 5، عسقلان',lat:31.6688,lng:34.5743},
+  {ar:'حولون',en:'Holon',addr:'شارع همِركاز 6، حولون',lat:32.0167,lng:34.7795},
+  {ar:'رمات غان',en:'Ramat Gan',addr:'شارع جابوتنسكي 49، رمات غان',lat:32.0700,lng:34.8235},
+  {ar:'رحوبوت',en:'Rehovot',addr:'شارع بيلو 2، رحوبوت',lat:31.8928,lng:34.8113},
+  {ar:'الخضيرة',en:'Hadera',addr:'شارع هِلل يافه 7، الخضيرة',lat:32.4340,lng:34.9196},
+  {ar:'الناصرة',en:'Nazareth',addr:'شارع باولس السادس، الناصرة',lat:32.7021,lng:35.2978},
+  {ar:'نوف هَجليل',en:'Nof HaGalil',addr:'شارع هَتَعَسِيّا 1، نوف هَجليل',lat:32.7036,lng:35.3170},
+  {ar:'طبريا',en:'Tiberias',addr:'شارع هَبَنِيم 1، طبريا',lat:32.7959,lng:35.5300},
+  {ar:'صفد',en:'Safed',addr:'شارع هَعَتسماؤوت 100، صفد',lat:32.9646,lng:35.4960},
+  {ar:'عكا',en:'Acre',addr:'شارع همِجينيم 35، عكا',lat:32.9281,lng:35.0818},
+  {ar:'نهاريا',en:'Nahariya',addr:'شارع هَجَعَتون 23، نهاريا',lat:33.0085,lng:35.0950},
+  {ar:'كرمئيل',en:'Karmiel',addr:'شارع نيسيم أهارون 1، كرمئيل',lat:32.9157,lng:35.2920},
+  {ar:'إيلات',en:'Eilat',addr:'مجمع هَعِيرونيّا، إيلات',lat:29.5577,lng:34.9519},
+  {ar:'كريات جات',en:'Kiryat Gat',addr:'شارع هَعَتسماؤوت 100، كريات جات',lat:31.6100,lng:34.7642},
+  {ar:'كريات شمونة',en:'Kiryat Shmona',addr:'شارع تل حاي 39، كريات شمونة',lat:33.2074,lng:35.5695},
+  {ar:'ديمونة',en:'Dimona',addr:'شارع هَحَلوتس 1، ديمونة',lat:31.0686,lng:35.0327},
+  {ar:'العفولة',en:'Afula',addr:'شارع يهوشع حنكين 1، العفولة',lat:32.6076,lng:35.2897},
+  {ar:'اللد',en:'Lod',addr:'شارع تسهال 4، اللد',lat:31.9514,lng:34.8951},
+  {ar:'الرملة',en:'Ramla',addr:'شارع داني ميس 1، الرملة',lat:31.9288,lng:34.8667},
+  {ar:'بيت شيمش',en:'Beit Shemesh',addr:'شارع هَنَسي هَريشون 8، بيت شيمش',lat:31.7497,lng:34.9886},
+  {ar:'مودیعین',en:"Modi'in",addr:'شارع همِسجير 1، مودیعین',lat:31.8980,lng:35.0104},
+  {ar:'بات يام',en:'Bat Yam',addr:'شارع همِركاز 1، بات يام',lat:32.0171,lng:34.7457},
+  {ar:'بني براك',en:'Bnei Brak',addr:'شارع جابوتنسكي 31، بني براك',lat:32.0809,lng:34.8338},
+  {ar:'هرتسليا',en:'Herzliya',addr:'شارع بن غوريون 22، هرتسليا',lat:32.1624,lng:34.8443},
+  {ar:'كفار سابا',en:'Kfar Saba',addr:'شارع ويتسمان 135، كفار سابا',lat:32.1750,lng:34.9070},
+  {ar:'أم الفحم',en:'Umm al-Fahm',addr:'الشارع الرئيسي، أم الفحم',lat:32.5197,lng:35.1530},
+  {ar:'الطيبة',en:'Tayibe',addr:'شارع الوحدة، الطيبة',lat:32.2660,lng:35.0090},
+  {ar:'رهط',en:'Rahat',addr:'مجمع البلدية، رهط',lat:31.3920,lng:34.7540}
+];
+var ilMap=null,ilMarkers=[],ilUserMarker=null,ilUserLoc=null,ilOfficeIcon=null,ilUserIcon=null;
+
+function ilHaversineKm(lat1,lng1,lat2,lng2){
+  var R=6371,toRad=function(d){return d*Math.PI/180;};
+  var dLat=toRad(lat2-lat1),dLng=toRad(lng2-lng1);
+  var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function ilHint(msg,cls){
+  var el=document.getElementById('il-hint');if(!el)return;
+  el.textContent=msg;el.className='d-expiry'+(cls?' '+cls:'');el.style.textAlign='right';
+}
+function ilInit(){
+  ilOfficeIcon=L.icon({
+    iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+    shadowUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    iconSize:[25,41],iconAnchor:[12,41],popupAnchor:[1,-34],shadowSize:[41,41]
+  });
+  ilUserIcon=L.icon({
+    iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+    shadowUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    iconSize:[25,41],iconAnchor:[12,41],popupAnchor:[1,-34],shadowSize:[41,41]
+  });
+  ilMap=L.map('il-map',{scrollWheelZoom:false}).setView([31.4,35.0],7);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19
+  }).addTo(ilMap);
+  ilOffices.forEach(function(o,i){
+    var m=L.marker([o.lat,o.lng],{icon:ilOfficeIcon}).addTo(ilMap);
+    // Bind popup via DOM nodes so office text is never parsed as HTML.
+    var box=document.createElement('div');box.dir='rtl';box.style.textAlign='right';
+    var t=document.createElement('strong');t.textContent='مكتب الداخلية — '+o.ar;
+    var a=document.createElement('div');a.style.cssText='font-size:11px;color:#555;margin-top:3px';a.textContent=o.addr;
+    box.appendChild(t);box.appendChild(a);
+    m.bindPopup(box);
+    o._marker=m;o._idx=i;
+  });
+  setTimeout(function(){if(ilMap)ilMap.invalidateSize();},200);
+  ilRenderList();
+}
+function ilRenderList(){
+  var listEl=document.getElementById('il-list');if(!listEl)return;
+  var q=(document.getElementById('il-search').value||'').trim().toLowerCase();
+  var rows=ilOffices.map(function(o){
+    var dist=ilUserLoc?ilHaversineKm(ilUserLoc.lat,ilUserLoc.lng,o.lat,o.lng):null;
+    return {o:o,dist:dist};
+  }).filter(function(r){
+    if(!q)return true;
+    return r.o.ar.toLowerCase().indexOf(q)>-1||r.o.en.toLowerCase().indexOf(q)>-1;
+  });
+  if(ilUserLoc) rows.sort(function(a,b){return a.dist-b.dist;});
+  else rows.sort(function(a,b){return a.o.ar.localeCompare(b.o.ar,'ar');});
+  listEl.innerHTML='';
+  if(!rows.length){
+    var e=document.createElement('div');e.className='il-empty';
+    e.textContent='لا توجد مكاتب مطابقة لبحثك.';listEl.appendChild(e);return;
+  }
+  rows.forEach(function(r){
+    var item=document.createElement('div');
+    item.className='il-item';item.setAttribute('data-idx',r.o._idx);
+    item.onclick=function(){ilFocus(r.o._idx);};
+    var name=document.createElement('div');name.className='il-name';
+    name.textContent='مكتب وزارة الداخلية — '+r.o.ar;
+    var addr=document.createElement('div');addr.className='il-addr';addr.textContent=r.o.addr;
+    item.appendChild(name);item.appendChild(addr);
+    if(r.dist!=null){
+      var d=document.createElement('span');d.className='il-dist';
+      d.textContent='يبعد نحو '+r.dist.toFixed(1)+' كم';
+      item.appendChild(d);
+    }
+    listEl.appendChild(item);
+  });
+}
+function ilFilter(){ilRenderList();}
+function ilFocus(idx){
+  var o=ilOffices[idx];if(!o||!ilMap)return;
+  ilMap.setView([o.lat,o.lng],13,{animate:true});
+  if(o._marker)o._marker.openPopup();
+  var items=document.querySelectorAll('#il-list .il-item');
+  items.forEach(function(el){el.classList.toggle('active',el.getAttribute('data-idx')==String(idx));});
+}
+function ilLocate(btn){
+  if(!navigator.geolocation){ilHint('متصفحك لا يدعم تحديد الموقع الجغرافي.','bad');return;}
+  ilHint('جارٍ تحديد موقعك&#8230;');
+  if(btn){btn.disabled=true;}
+  navigator.geolocation.getCurrentPosition(function(pos){
+    if(btn){btn.disabled=false;}
+    ilUserLoc={lat:pos.coords.latitude,lng:pos.coords.longitude};
+    if(ilMap){
+      if(ilUserMarker)ilMap.removeLayer(ilUserMarker);
+      ilUserMarker=L.marker([ilUserLoc.lat,ilUserLoc.lng],{icon:ilUserIcon}).addTo(ilMap).bindPopup('موقعك الحالي');
+    }
+    ilRenderList();
+    // Nearest is first row after sort.
+    var nearest=null,minD=Infinity;
+    ilOffices.forEach(function(o){
+      var d=ilHaversineKm(ilUserLoc.lat,ilUserLoc.lng,o.lat,o.lng);
+      if(d<minD){minD=d;nearest=o;}
+    });
+    if(nearest){
+      ilHint('أقرب مكتب إليك: '+nearest.ar+' — على بُعد نحو '+minD.toFixed(1)+' كم.','ok');
+      if(ilMap){
+        ilMap.fitBounds(L.latLngBounds([[ilUserLoc.lat,ilUserLoc.lng],[nearest.lat,nearest.lng]]).pad(0.4));
+        if(nearest._marker)nearest._marker.openPopup();
+      }
+    }
+  },function(err){
+    if(btn){btn.disabled=false;}
+    var msg=err&&err.code===1?'تم رفض إذن تحديد الموقع. فعّله للعثور على أقرب مكتب.':'تعذّر تحديد موقعك. حاول مجددًا.';
+    ilHint(msg,'bad');
+  },{enableHighAccuracy:true,timeout:10000,maximumAge:60000});
+}
+(function(){
+  var el=document.getElementById('il-map');
+  if(!el)return;
+  new IntersectionObserver(function(entries){
+    if(entries[0].isIntersecting&&!ilMap) ilInit();
   },{threshold:0.1}).observe(el);
 }());
 </script>
